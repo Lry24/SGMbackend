@@ -6,7 +6,7 @@ import com.sgm.SGMbackend.entity.enums.StatutDepouille;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
 import com.sgm.SGMbackend.repository.AutopsieRepository;
-import com.sgm.SGMbackend.repository.DepouillRepository;
+import com.sgm.SGMbackend.repository.DepouilleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +33,7 @@ import java.util.List;
 public class AutopsieService {
 
     private final AutopsieRepository autoRepository;
-    private final DepouillRepository depouillRepository;
+    private final DepouilleRepository depouillRepository;
 
     /**
      * Planifier une nouvelle autopsie pour une dépouille.
@@ -53,10 +53,8 @@ public class AutopsieService {
                     "Cette dépouille a déjà une autopsie active (PLANIFIEE ou EN_COURS).");
         }
 
-        // Règle 3 : changer le statut de la dépouille
-        depouill.setStatut(StatutDepouille.EN_AUTOPSIE);
-        depouillRepository.save(depouill);
-
+        // NOTE : la dépouille passe à EN_AUTOPSIE uniquement au DÉMARRAGE (demarrer())
+        // Ici on crée simplement la planification
         Autopsie a = Autopsie.builder()
                 .depouille(depouill)
                 .medecinId(medecinId)
@@ -75,6 +73,11 @@ public class AutopsieService {
         if (a.getStatut() != StatutAutopsie.PLANIFIEE) {
             throw new BusinessRuleException("Seule une autopsie PLANIFIEE peut être démarrée.");
         }
+        // La dépouille passe à EN_AUTOPSIE au démarrage effectif de l'autopsie
+        var dep = a.getDepouille();
+        dep.setStatut(StatutDepouille.EN_AUTOPSIE);
+        depouillRepository.save(dep);
+
         a.setStatut(StatutAutopsie.EN_COURS);
         a.setDateDebut(LocalDateTime.now());
         return autoRepository.save(a);

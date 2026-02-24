@@ -53,6 +53,7 @@ public class Autopsie {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private StatutAutopsie statut = StatutAutopsie.PLANIFIEE;
 
     @CreatedDate

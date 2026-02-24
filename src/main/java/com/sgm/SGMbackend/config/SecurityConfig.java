@@ -32,45 +32,48 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+        private final JwtAuthFilter jwtAuthFilter;
+        private final ObjectMapper objectMapper;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(ex -> ex
-                        // 401 quand pas de token (au lieu du 403 par défaut de Spring Security)
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json;charset=UTF-8");
-                            Map<String, Object> body = Map.of(
-                                    "timestamp", LocalDateTime.now().toString(),
-                                    "status", 401,
-                                    "message", "Token manquant ou invalide",
-                                    "path", request.getRequestURI());
-                            response.getWriter().write(objectMapper.writeValueAsString(body));
-                        })
-                        // 403 quand token valide mais rôle insuffisant
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setContentType("application/json;charset=UTF-8");
-                            Map<String, Object> body = Map.of(
-                                    "timestamp", LocalDateTime.now().toString(),
-                                    "status", 403,
-                                    "message", "Accès refusé — rôle insuffisant",
-                                    "path", request.getRequestURI());
-                            response.getWriter().write(objectMapper.writeValueAsString(body));
-                        }))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**").permitAll()
-                        .requestMatchers("/api/health").permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .exceptionHandling(ex -> ex
+                                                // 401 quand pas de token (au lieu du 403 par défaut de Spring Security)
+                                                .authenticationEntryPoint((request, response, authException) -> {
+                                                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                                        response.setContentType("application/json;charset=UTF-8");
+                                                        Map<String, Object> body = Map.of(
+                                                                        "timestamp", LocalDateTime.now().toString(),
+                                                                        "status", 401,
+                                                                        "message", "Token manquant ou invalide",
+                                                                        "path", request.getRequestURI());
+                                                        response.getWriter()
+                                                                        .write(objectMapper.writeValueAsString(body));
+                                                })
+                                                // 403 quand token valide mais rôle insuffisant
+                                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                                        response.setContentType("application/json;charset=UTF-8");
+                                                        Map<String, Object> body = Map.of(
+                                                                        "timestamp", LocalDateTime.now().toString(),
+                                                                        "status", 403,
+                                                                        "message", "Accès refusé — rôle insuffisant",
+                                                                        "path", request.getRequestURI());
+                                                        response.getWriter()
+                                                                        .write(objectMapper.writeValueAsString(body));
+                                                }))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/auth/login").permitAll()
+                                                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**")
+                                                .permitAll()
+                                                .requestMatchers("/api/health").permitAll()
+                                                .anyRequest().authenticated())
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
 }

@@ -49,6 +49,7 @@ public class Depouille {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private StatutDepouille statut = StatutDepouille.RECUE;
 
     // Lien vers l'emplacement (chambre froide) — géré par DEV C

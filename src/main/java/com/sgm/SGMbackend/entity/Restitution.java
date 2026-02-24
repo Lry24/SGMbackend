@@ -45,10 +45,13 @@ public class Restitution {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private StatutRestitution statut = StatutRestitution.PLANIFIEE;
 
     // Checklist pré-requis (calculés au moment de la confirmation)
+    @Builder.Default
     private Boolean facturesSoldees = false;
+    @Builder.Default
     private Boolean documentsComplets = false;
 
     @CreatedDate

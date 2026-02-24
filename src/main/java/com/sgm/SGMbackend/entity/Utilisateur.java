@@ -1,5 +1,6 @@
 package com.sgm.SGMbackend.entity;
 
+import com.sgm.SGMbackend.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -8,33 +9,34 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "familles")
+@Table(name = "utilisateurs")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Famille {
+public class Utilisateur {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
+    @Column(nullable = false)
+    private String nom;
 
     @Column(nullable = false)
-    private String tuteurLegal; // Nom complet du représentant
+    private String prenom;
 
-    @Column(nullable = false)
-    private String lienParente; // Fils, fille, époux(se), frère, sœur...
-
-    @Column(nullable = false)
-    private String telephone;
-
+    @Column(unique = true, nullable = false)
     private String email;
-    private String adresse;
-    private String pieceIdentiteRef;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    @Column(nullable = false)
     @Builder.Default
-    private Boolean actif = true; // Soft delete
+    private Boolean actif = true;
+
+    private LocalDateTime derniereConnexion;
 
     @CreatedDate
     @Column(updatable = false)

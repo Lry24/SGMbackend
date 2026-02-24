@@ -6,7 +6,7 @@ import com.sgm.SGMbackend.entity.enums.StatutFacture;
 import com.sgm.SGMbackend.entity.enums.StatutRestitution;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
-import com.sgm.SGMbackend.repository.DepouillRepository;
+import com.sgm.SGMbackend.repository.DepouilleRepository;
 import com.sgm.SGMbackend.repository.FamilleRepository;
 import com.sgm.SGMbackend.repository.FactureRepository;
 import com.sgm.SGMbackend.repository.RestitutionRepository;
@@ -37,7 +37,7 @@ import java.util.List;
 public class RestitutionService {
 
     private final RestitutionRepository restitutionRepository;
-    private final DepouillRepository depouillRepository;
+    private final DepouilleRepository depouillRepository;
     private final FamilleRepository familleRepository;
     private final FactureRepository factureRepository;
 

@@ -25,6 +25,7 @@ public class Emplacement {
 
     private String code; // ex: CF-A-01
     private String description;
+    @Builder.Default
     private Boolean occupe = false;
     private Integer capacite;
 
