@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Entité centrale du système : représente un défunt pris en charge par la
@@ -53,7 +54,7 @@ public class Depouille {
     private StatutDepouille statut = StatutDepouille.RECUE;
 
     // Lien vers l'emplacement (chambre froide) — géré par DEV C
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emplacement_id")
     private Emplacement emplacement;
 
@@ -61,6 +62,10 @@ public class Depouille {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "famille_id")
     private Famille famille;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "entiteId") // On utilise le champ générique pour le lien
+    private List<Document> documents;
 
     @CreatedDate
     @Column(updatable = false)

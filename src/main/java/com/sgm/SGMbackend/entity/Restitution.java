@@ -40,6 +40,7 @@ public class Restitution {
 
     private LocalDateTime dateEffective;
     private String motifAnnulation;
+    private String numeroBonRestitution; // Ajouté pour conformité diagramme
     private String representantFamille; // nom de la personne qui récupère la dépouille
     private String pieceIdentiteRef; // référence pièce d'identité du représentant
 
@@ -47,6 +48,10 @@ public class Restitution {
     @Column(nullable = false)
     @Builder.Default
     private StatutRestitution statut = StatutRestitution.PLANIFIEE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "validateur_id")
+    private Utilisateur valideePar;
 
     // Checklist pré-requis (calculés au moment de la confirmation)
     @Builder.Default

@@ -24,11 +24,14 @@ public class Emplacement {
     @Builder.Default
     private Boolean occupe = false;
 
+    private LocalDateTime dateAffectation; // Ajouté pour conformité diagramme
+
     // --- RELATION MANQUANTE AJOUTÉE ICI ---
     @ManyToOne
     @JoinColumn(name = "chambre_froide_id")
     private ChambreFroide chambreFroide;
-    // Ce nom "chambreFroide" doit être identique au mappedBy de la classe ChambreFroide
+    // Ce nom "chambreFroide" doit être identique au mappedBy de la classe
+    // ChambreFroide
     // ---------------------------------------
 
     @OneToOne(mappedBy = "emplacement")

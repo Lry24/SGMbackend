@@ -26,7 +26,7 @@ public class Autopsie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "depouille_id", nullable = false)
     private Depouille depouille;
 
@@ -39,6 +39,7 @@ public class Autopsie {
     @Column(nullable = false)
     private LocalDateTime datePlanifiee;
 
+    private String salle; // Ajouté pour conformité diagramme
     private LocalDateTime dateDebut;
     private LocalDateTime dateFin;
 
@@ -55,6 +56,9 @@ public class Autopsie {
     @Column(nullable = false)
     @Builder.Default
     private StatutAutopsie statut = StatutAutopsie.PLANIFIEE;
+
+    @OneToOne(mappedBy = "autopsie")
+    private Facture facture;
 
     @CreatedDate
     @Column(updatable = false)

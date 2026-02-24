@@ -25,6 +25,8 @@ public class Facture {
     @Column(unique = true, nullable = false)
     private String numero; // FAC-2026-0001
 
+    private LocalDateTime dateEmission; // Ajouté pour conformité diagramme
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "famille_id", nullable = false)
     private Famille famille;
@@ -32,6 +34,10 @@ public class Facture {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "depouille_id")
     private Depouille depouille;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "autopsie_id")
+    private Autopsie autopsie;
 
     @Builder.Default
     private Double montantTotal = 0.0;

@@ -12,9 +12,11 @@ import java.util.List;
 public class FactureResponseDTO {
 
     private Long id;
-    private String numero;                        // FAC-2026-0001
+    private String numero; // FAC-2026-0001
+    private LocalDateTime dateEmission;
     private FamilleResponseDTO famille;
-    private Long depouillId;
+    private Long depouilleId;
+    private Long autopsieId;
     private Double montantTotal;
     private Double montantPaye;
     private Double remise;

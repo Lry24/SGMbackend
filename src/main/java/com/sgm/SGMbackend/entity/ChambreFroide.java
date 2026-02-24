@@ -1,4 +1,7 @@
 package com.sgm.SGMbackend.entity;
+
+import com.sgm.SGMbackend.entity.enums.StatutChambre;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -10,7 +13,10 @@ import java.util.List;
 @Entity
 @Table(name = "chambres_froides")
 @EntityListeners(AuditingEntityListener.class)
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 
 public class ChambreFroide {
 
@@ -19,19 +25,24 @@ public class ChambreFroide {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String numero;          // ex: CF-01, CF-02
+    private String numero; // ex: CF-01, CF-02
 
     @Column(nullable = false)
-    private Integer capacite;       // Nombre total d'emplacements
+    private Integer capacite; // Nombre total d'emplacements
 
-    private Float temperatureCible;  // Température idéale en °C
+    private Float temperatureCible; // Température idéale en °C
     private Float temperatureActuelle;
-    private String statut;           // OPERATIONNELLE, MAINTENANCE, HORS_SERVICE
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatutChambre statut = StatutChambre.OPERATIONNELLE;
 
     @OneToMany(mappedBy = "chambreFroide", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Emplacement> emplacements;
 
-    @CreatedDate @Column(updatable = false)
+    @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate

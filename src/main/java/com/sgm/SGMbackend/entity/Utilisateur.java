@@ -7,10 +7,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "utilisateurs")
 @EntityListeners(AuditingEntityListener.class)
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,6 +39,13 @@ public class Utilisateur {
     private Boolean actif = true;
 
     private LocalDateTime derniereConnexion;
+
+    @OneToMany(mappedBy = "valideePar")
+    private List<Restitution> restitutionsValidees;
+
+    public String getNomComplet() {
+        return (prenom != null ? prenom : "") + " " + (nom != null ? nom : "");
+    }
 
     @CreatedDate
     @Column(updatable = false)
