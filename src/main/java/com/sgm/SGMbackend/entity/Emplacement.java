@@ -9,7 +9,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "emplacements")
 @EntityListeners(AuditingEntityListener.class)
-@Data
+@Getter
+@Setter
+@ToString(exclude = { "chambreFroide", "depouille" })
+@EqualsAndHashCode(exclude = { "chambreFroide", "depouille" })
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

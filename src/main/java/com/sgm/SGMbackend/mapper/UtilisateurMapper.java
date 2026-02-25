@@ -15,6 +15,8 @@ public interface UtilisateurMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "derniereConnexion", ignore = true)
     @Mapping(target = "actif", ignore = true)
+    @Mapping(target = "doitChangerMotDePasse", ignore = true)
+    @Mapping(target = "restitutionsValidees", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Utilisateur toEntity(UtilisateurRequestDTO requestDTO);
@@ -22,6 +24,8 @@ public interface UtilisateurMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "derniereConnexion", ignore = true)
     @Mapping(target = "actif", ignore = true)
+    @Mapping(target = "doitChangerMotDePasse", ignore = true)
+    @Mapping(target = "restitutionsValidees", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(UtilisateurRequestDTO requestDTO, @MappingTarget Utilisateur entity);

@@ -17,7 +17,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "restitutions")
 @EntityListeners(AuditingEntityListener.class)
-@Data
+@Getter
+@Setter
+@ToString(exclude = { "valideePar" })
+@EqualsAndHashCode(exclude = { "valideePar" })
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -13,7 +13,10 @@ import java.util.List;
 @Table(name = "utilisateurs")
 @EntityListeners(AuditingEntityListener.class)
 
-@Data
+@Getter
+@Setter
+@ToString(exclude = "restitutionsValidees")
+@EqualsAndHashCode(exclude = "restitutionsValidees")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -34,9 +37,13 @@ public class Utilisateur {
     @Column(nullable = false)
     private Role role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default true")
     @Builder.Default
     private Boolean actif = true;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean doitChangerMotDePasse = false;
 
     private LocalDateTime derniereConnexion;
 
