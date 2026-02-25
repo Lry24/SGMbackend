@@ -6,10 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface DepouilleService {
-
     Depouille enregistrer(Depouille depouille);
-
-    Depouille modifier(Long id, Depouille updated);
 
     Depouille changerStatut(Long id, StatutDepouille nouveauStatut);
 
@@ -17,7 +14,7 @@ public interface DepouilleService {
 
     Depouille findById(Long id);
 
-    Page<Depouille> findAll(Pageable pageable,
-                            String search,
-                            List<String> historique(Long id);                     StatutDepouille statut);
+    Page<Depouille> findAll(Pageable pageable, String search, StatutDepouille statut);
+
+    byte[] getQRCode(Long id);
 }

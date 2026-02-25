@@ -1,21 +1,18 @@
 package com.sgm.SGMbackend.service;
 
 import com.sgm.SGMbackend.entity.ChambreFroide;
-import com.sgm.SGMbackend.entity.Emplacement;
+import java.util.List;
 
 public interface ChambreFroideService {
+    ChambreFroide creer(String numero, int capacite, float tempCible);
 
-    ChambreFroide creer(String numero,
-                        int capacite,
-                        float temperatureCible);
+    ChambreFroide modifier(Long id, int capacite, float tempCible);
 
-    Emplacement affecter(Long depouilleId,
-                         Long emplacementId);
+    void enregistrerTemperature(Long chambreId, float temperature);
 
-    void liberer(Long emplacementId);
+    ChambreFroide findById(Long id);
 
-    void enregistrerTemperature(Long chambreId,
-                                float temperature);
+    List<ChambreFroide> findAll();
 
-    double calculerTauxOccupation(Long chambreId);
+    List<ChambreFroide> cartographie();
 }
