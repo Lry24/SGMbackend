@@ -16,6 +16,7 @@ public class UtilisateurResponseDTO {
     private String email;
     private Role role;
     private Boolean actif;
+    private Boolean doitChangerMotDePasse;
     private LocalDateTime derniereConnexion;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

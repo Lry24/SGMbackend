@@ -20,7 +20,10 @@ import java.util.List;
 @Entity
 @Table(name = "depouilles")
 @EntityListeners(AuditingEntityListener.class)
-@Data
+@Getter
+@Setter
+@ToString(exclude = { "emplacement", "famille", "documents" })
+@EqualsAndHashCode(exclude = { "emplacement", "famille", "documents" })
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

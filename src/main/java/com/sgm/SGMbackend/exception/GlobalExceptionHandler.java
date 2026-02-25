@@ -33,6 +33,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<Map<String, Object>> handleBusiness(
             BusinessRuleException ex, HttpServletRequest req) {
+        // On s'assure que le message n'est pas tronqué
         return buildError(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), req.getRequestURI());
     }
 
