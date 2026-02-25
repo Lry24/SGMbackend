@@ -104,6 +104,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- OAuth2 Resource Server (JWKS / ES256 support for Supabase) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
 		<!-- QR Code Generation (ZXing) -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>

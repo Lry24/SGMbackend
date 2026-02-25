@@ -13,11 +13,13 @@ import java.util.List;
 @Entity
 @Table(name = "chambres_froides")
 @EntityListeners(AuditingEntityListener.class)
-@Data
+@Getter
+@Setter
+@ToString(exclude = { "emplacements" })
+@EqualsAndHashCode(exclude = { "emplacements" })
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class ChambreFroide {
 
     @Id
