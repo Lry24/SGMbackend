@@ -23,4 +23,6 @@ public interface DepouilleRepository extends JpaRepository<Depouille, Long> {
     java.util.List<Depouille> findByStatutAndNomDefuntIsNull(StatutDepouille statut); // Dépouilles non identifiées
 
     boolean existsByIdentifiantUnique(String identifiantUnique);
+
+    java.util.List<Depouille> findByFamille_Id(Long familleId);
 }
