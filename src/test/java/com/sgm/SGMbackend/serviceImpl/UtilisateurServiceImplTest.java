@@ -113,4 +113,70 @@ class UtilisateurServiceImplTest {
         verify(restTemplate).exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class));
         verify(utilisateurRepository).save(any(Utilisateur.class));
     }
+
+    @Test
+    @DisplayName("update doit mettre à jour l'utilisateur existant")
+    void update_Success() {
+        // Arrange
+        String id = "user-123";
+        UtilisateurRequestDTO dto = UtilisateurRequestDTO.builder()
+                .nom("NewNom")
+                .prenom("NewPrenom")
+                .email("new@email.com")
+                .role(Role.ADMIN)
+                .build();
+        Utilisateur existingUser = Utilisateur.builder().id(id).build();
+
+        when(utilisateurRepository.findById(id)).thenReturn(Optional.of(existingUser));
+        when(utilisateurRepository.save(any(Utilisateur.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(utilisateurMapper.toResponseDTO(any(Utilisateur.class)))
+                .thenReturn(UtilisateurResponseDTO.builder().nom("NewNom").build());
+
+        // Act
+        UtilisateurResponseDTO result = utilisateurService.update(id, dto);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("NewNom", result.getNom());
+        verify(utilisateurRepository).save(existingUser);
+    }
+
+    @Test
+    @DisplayName("setActif doit mettre à jour le statut et bannir dans Supabase")
+    void setActif_Success() {
+        // Arrange
+        String id = "user-123";
+        Utilisateur user = Utilisateur.builder().id(id).actif(true).build();
+        when(utilisateurRepository.findById(id)).thenReturn(Optional.of(user));
+        when(supabaseConfig.getAuthUrl()).thenReturn("http://supabase.com/auth");
+        when(supabaseConfig.getServiceKey()).thenReturn("service-key");
+
+        // Act
+        utilisateurService.setActif(id, false);
+
+        // Assert
+        assertFalse(user.getActif());
+        verify(utilisateurRepository).save(user);
+        verify(restTemplate).exchange(contains("/admin/users/" + id), eq(HttpMethod.PUT), any(HttpEntity.class),
+                eq(Void.class));
+    }
+
+    @Test
+    @DisplayName("delete doit supprimer l'utilisateur de Supabase et de la DB")
+    void delete_Success() {
+        // Arrange
+        String id = "user-123";
+        Utilisateur user = Utilisateur.builder().id(id).build();
+        when(utilisateurRepository.findById(id)).thenReturn(Optional.of(user));
+        when(supabaseConfig.getAuthUrl()).thenReturn("http://supabase.com/auth");
+        when(supabaseConfig.getServiceKey()).thenReturn("service-key");
+
+        // Act
+        utilisateurService.delete(id);
+
+        // Assert
+        verify(utilisateurRepository).delete(user);
+        verify(restTemplate).exchange(contains("/admin/users/" + id), eq(HttpMethod.DELETE), any(HttpEntity.class),
+                eq(Void.class));
+    }
 }

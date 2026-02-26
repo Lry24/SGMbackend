@@ -8,12 +8,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/autopsies")
 @RequiredArgsConstructor
+@Tag(name = "Gestion des Autopsies", description = "Endpoints pour la gestion des rapports d'autopsie")
 public class AutopsieController {
 
     private final AutopsieService autoService;

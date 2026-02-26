@@ -1,0 +1,59 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.sgm:SGMbackend >-------------------------
+[INFO] Building SGMbackend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ SGMbackend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ SGMbackend ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ SGMbackend ---
+[INFO] skip non existing resourceDirectory C:\Users\hp\eclipse-workspace\SGMbackend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ SGMbackend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 30 source files with javac [debug release 17] to target\test-classes
+[INFO] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/SecurityIntegrationTest.java: C:\Users\hp\eclipse-workspace\SGMbackend\src\test\java\com\sgm\SGMbackend\SecurityIntegrationTest.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/SecurityIntegrationTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/controller/ComptabiliteControllerTest.java:[70,77] cannot find symbol
+  symbol:   method builder()
+  location: class com.sgm.SGMbackend.dto.dtoResponse.CaisseResponseDTO
+[ERROR] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/controller/ComptabiliteControllerTest.java:[105,89] cannot find symbol
+  symbol:   method builder()
+  location: class com.sgm.SGMbackend.dto.dtoResponse.MouvementCaisseResponseDTO
+[ERROR] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/serviceImpl/ChambreFroideServiceImplTest.java:[55,61] cannot find symbol
+  symbol:   method size()
+  location: variable list of type java.lang.Iterable<com.sgm.SGMbackend.entity.Emplacement>
+[INFO] 3 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.177 s
+[INFO] Finished at: 2026-02-26T17:16:47Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile (default-testCompile) on project SGMbackend: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/controller/ComptabiliteControllerTest.java:[70,77] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.sgm.SGMbackend.dto.dtoResponse.CaisseResponseDTO
+[ERROR] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/controller/ComptabiliteControllerTest.java:[105,89] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.sgm.SGMbackend.dto.dtoResponse.MouvementCaisseResponseDTO
+[ERROR] /C:/Users/hp/eclipse-workspace/SGMbackend/src/test/java/com/sgm/SGMbackend/serviceImpl/ChambreFroideServiceImplTest.java:[55,61] cannot find symbol
+[ERROR]   symbol:   method size()
+[ERROR]   location: variable list of type java.lang.Iterable<com.sgm.SGMbackend.entity.Emplacement>
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Gestion de l'Authentification", description = "Endpoints pour l'authentification et la gestion des sessions")
 public class AuthController {
 
     private final AuthService authService;

@@ -21,4 +21,7 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
     Page<Facture> findByStatutAndFamille_Id(StatutFacture statut, Long familleId, Pageable pageable);
 
     List<Facture> findByStatutIn(List<StatutFacture> statuts); // Impayées
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(f.montantTotal) FROM Facture f WHERE f.statut = 'SOLDEE'")
+    Double sumTotalRecettes();
 }

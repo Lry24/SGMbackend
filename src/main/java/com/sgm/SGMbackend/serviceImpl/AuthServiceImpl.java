@@ -23,6 +23,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * Implémentation du service d'authentification.
+ * Ce service s'appuie sur Supabase Auth pour la gestion des sessions et des
+ * identifiants.
+ * Il assure également la synchronisation des données de connexion avec la base
+ * de données locale (PostgreSQL).
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,8 +40,16 @@ public class AuthServiceImpl implements AuthService {
     private final UtilisateurMapper utilisateurMapper;
     private final RestTemplate restTemplate;
 
-    // ─── Login ────────────────────────────────────────────────────────────────
-
+    /**
+     * Authentifie un utilisateur via l'API REST de Supabase Auth.
+     * En cas de succès, met à jour la date de dernière connexion en base locale.
+     * 
+     * @param email    Email de l'utilisateur
+     * @param password Mot de passe
+     * @return Map contenant le access_token, refresh_token et les métadonnées
+     *         utilisateur
+     * @throws BusinessRuleException si les identifiants sont invalides
+     */
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> login(String email, String password) {
@@ -66,8 +81,10 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    // ─── Logout ───────────────────────────────────────────────────────────────
-
+    /**
+     * Déconnecte l'utilisateur en invalidant son token auprès de Supabase
+     * et en nettoyant le contexte de sécurité local.
+     */
     @Override
     public void logout() {
         String token = getCurrentToken();

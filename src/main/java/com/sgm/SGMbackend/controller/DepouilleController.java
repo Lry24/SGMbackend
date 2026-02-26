@@ -6,6 +6,10 @@ import com.sgm.SGMbackend.entity.Depouille;
 import com.sgm.SGMbackend.entity.enums.StatutDepouille;
 import com.sgm.SGMbackend.mapper.DepouilleMapper;
 import com.sgm.SGMbackend.service.DepouilleService;
+import com.sgm.SGMbackend.service.RestitutionService;
+import com.sgm.SGMbackend.dto.dtoResponse.FactureResponseDTO;
+import com.sgm.SGMbackend.mapper.FactureMapper;
+import com.sgm.SGMbackend.service.FactureService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,15 +20,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/depouilles")
 @RequiredArgsConstructor
+@Tag(name = "Gestion des Dépouilles", description = "Endpoints pour l'enregistrement et le suivi des dépouilles")
 public class DepouilleController {
 
     private final DepouilleService depouilleService;
     private final DepouilleMapper depouilleMapper;
+    private final RestitutionService restitutionService;
+    private final FactureService factureService;
+    private final FactureMapper factureMapper;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN')")
@@ -82,6 +91,12 @@ public class DepouilleController {
     @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
     public ResponseEntity<byte[]> getQRCode(@PathVariable Long id) {
         return ResponseEntity.ok(depouilleService.getQRCode(id));
+    }
+
+    @GetMapping("/{id}/facture")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','COMPTABLE')")
+    public ResponseEntity<FactureResponseDTO> getFacture(@PathVariable Long id) {
+        return ResponseEntity.ok(factureMapper.toResponseDTO(factureService.findByDepouille(id)));
     }
 
     @DeleteMapping("/{id}")

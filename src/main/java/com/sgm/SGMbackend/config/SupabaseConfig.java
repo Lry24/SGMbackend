@@ -1,7 +1,9 @@
 package com.sgm.SGMbackend.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Configuration Supabase — centralise les propriétés d'accès à Supabase.
@@ -14,6 +16,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SupabaseConfig {
 
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
     @Value("${supabase.url}")
     private String supabaseUrl;
 
@@ -25,6 +32,11 @@ public class SupabaseConfig {
 
     @Value("${supabase.jwt.secret}")
     private String jwtSecret;
+
+    /**
+     * Bucket name for documents (must be created in Supabase Dashboard)
+     */
+    public static final String BUCKET_DOCUMENTS = "sgm-documents";
 
     public String getSupabaseUrl() {
         return supabaseUrl;

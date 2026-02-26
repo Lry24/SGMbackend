@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/emplacements")
 @RequiredArgsConstructor
+@Tag(name = "Gestion des Emplacements", description = "Endpoints pour la gestion des casiers et leur disponibilité")
 public class EmplacementController {
 
     private final EmplacementService emplacementService;

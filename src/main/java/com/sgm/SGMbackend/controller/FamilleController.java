@@ -12,11 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/familles")
 @RequiredArgsConstructor
+@Tag(name = "Gestion des Familles", description = "Endpoints pour la gestion des contacts familiaux")
 public class FamilleController {
 
     private final FamilleService familleService;
