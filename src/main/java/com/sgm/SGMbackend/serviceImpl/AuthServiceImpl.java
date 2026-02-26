@@ -39,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurMapper utilisateurMapper;
     private final RestTemplate restTemplate;
+    private final com.sgm.SGMbackend.service.UtilisateurService utilisateurService;
 
     /**
      * Authentifie un utilisateur via l'API REST de Supabase Auth.
@@ -175,6 +176,17 @@ public class AuthServiceImpl implements AuthService {
                     e.getStatusCode(), e.getResponseBodyAsString());
             throw new BusinessRuleException("Impossible de modifier le mot de passe : " + e.getMessage());
         }
+    }
+
+    @Override
+    public void forgotPassword(String email) {
+        utilisateurRepository.findByEmail(email).ifPresentOrElse(
+                u -> utilisateurService.resetPassword(u.getId()),
+                () -> {
+                    // Pour éviter le dénombrement d'utilisateurs, on ne lève pas d'erreur
+                    // mais on loggue
+                    log.warn("Demande de reset password pour email inexistant : {}", email);
+                });
     }
 
     // ─── Helper ───────────────────────────────────────────────────────────────

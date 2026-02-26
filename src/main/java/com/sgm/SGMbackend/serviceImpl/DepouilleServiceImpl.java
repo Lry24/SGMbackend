@@ -30,8 +30,13 @@ public class DepouilleServiceImpl implements DepouilleService {
     @Transactional
     public Depouille enregistrer(Depouille depouille) {
         // RÈGLE 1 — Génération ID unique : Format SGM-AAAA-NNNNN
+        // On évite count() + 1 car les suppressions créent des collisions
         depouille.setIdentifiantUnique(genererIdentifiantUnique());
-        depouille.setDateArrivee(LocalDateTime.now());
+
+        if (depouille.getDateArrivee() == null) {
+            depouille.setDateArrivee(LocalDateTime.now());
+        }
+
         depouille.setStatut(StatutDepouille.RECUE);
         return depouilleRepository.save(depouille);
     }
@@ -93,8 +98,19 @@ public class DepouilleServiceImpl implements DepouilleService {
 
     private String genererIdentifiantUnique() {
         int annee = Year.now().getValue();
-        long count = depouilleRepository.count() + 1;
-        return String.format("SGM-%d-%05d", annee, count);
+        String prefix = String.format("SGM-%d-", annee);
+
+        // On cherche le dernier identifiant de l'année en cours de façon robuste
+        long max = depouilleRepository.findAll().stream()
+                .map(Depouille::getIdentifiantUnique)
+                .filter(id -> id != null && id.startsWith(prefix))
+                .map(id -> id.substring(prefix.length()))
+                .filter(s -> s.matches("\\d+")) // Sécurité : seulement si c'est numérique
+                .mapToLong(Long::parseLong)
+                .max()
+                .orElse(0);
+
+        return String.format("%s%05d", prefix, max + 1);
     }
 
     private void validerTransition(StatutDepouille actuel, StatutDepouille nouveau) {

@@ -50,9 +50,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(
             Exception ex, HttpServletRequest req) {
-        // Log l'exception côté serveur sans l'exposer au client
+        // Log l'exception côté serveur
+        ex.printStackTrace();
         return buildError(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Erreur interne — consulter les logs", req.getRequestURI());
+                "Erreur interne : " + ex.getMessage(), req.getRequestURI());
     }
 
     private ResponseEntity<Map<String, Object>> buildError(

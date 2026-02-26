@@ -66,7 +66,7 @@ public class SecurityConfig {
                                                                         .write(objectMapper.writeValueAsString(body));
                                                 }))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/auth/login").permitAll()
+                                                .requestMatchers("/api/auth/login", "/api/auth/forgot-password").permitAll()
                                                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**")
                                                 .permitAll()
                                                 .requestMatchers("/api/health").permitAll()

@@ -118,8 +118,8 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable : " + id));
 
         // On utilise l'endpoint public /recover qui déclenche l'envoi d'email par
-        // Supabase
-        String url = supabaseConfig.getAuthUrl() + "/recover";
+        // Supabase. On ajoute redirectTo pour forcer le retour sur notre page de reset.
+        String url = supabaseConfig.getAuthUrl() + "/recover?redirectTo=http://localhost:4200/reset-password";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

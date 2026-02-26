@@ -34,4 +34,9 @@ public interface AuthService {
      * Modifie le mot de passe de l'utilisateur courant via Supabase.
      */
     void changePassword(String oldPassword, String newPassword);
+
+    /**
+     * Déclenche une demande de réinitialisation de mot de passe par email.
+     */
+    void forgotPassword(String email);
 }

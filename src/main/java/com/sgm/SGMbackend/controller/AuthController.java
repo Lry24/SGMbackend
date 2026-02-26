@@ -44,4 +44,10 @@ public class AuthController {
         authService.changePassword(body.get("oldPassword"), body.get("newPassword"));
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+        authService.forgotPassword(body.get("email"));
+        return ResponseEntity.ok().build();
+    }
 }
