@@ -39,4 +39,9 @@ public interface AuthService {
      * Déclenche une demande de réinitialisation de mot de passe par email.
      */
     void forgotPassword(String email);
+
+    /**
+     * Met à jour les informations du profil de l'utilisateur.
+     */
+    UtilisateurResponseDTO updateProfile(String nom, String prenom);
 }

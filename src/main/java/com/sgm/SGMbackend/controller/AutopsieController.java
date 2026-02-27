@@ -39,7 +39,8 @@ public class AutopsieController {
         Long depouillId = Long.valueOf(body.get("depouillId").toString());
         String medecinId = body.get("medecinId").toString();
         LocalDateTime date = LocalDateTime.parse(body.get("datePlanifiee").toString());
-        return ResponseEntity.status(201).body(autoService.planifier(depouillId, medecinId, date));
+        String salle = body.get("salle") != null ? body.get("salle").toString() : null;
+        return ResponseEntity.status(201).body(autoService.planifier(depouillId, medecinId, date, salle));
     }
 
     @PatchMapping("/{id}/demarrer")

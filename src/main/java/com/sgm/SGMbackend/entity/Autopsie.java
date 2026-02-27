@@ -1,5 +1,6 @@
 package com.sgm.SGMbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sgm.SGMbackend.entity.enums.StatutAutopsie;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,6 +27,7 @@ public class Autopsie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "depouille_id", nullable = false)
     private Depouille depouille;
@@ -35,6 +37,14 @@ public class Autopsie {
     private String medecinId;
 
     private String nomMedecin; // copie dénormalisée pour les rapports
+
+    // Champs dénormalisés de la dépouille (pour éviter les boucles de
+    // sérialisation)
+    @Column(name = "depouille_id_denorm")
+    private Long depouilleId;
+    private String nomDefunt;
+    private String prenomDefunt;
+    private String identifiantUniqueDepouille;
 
     @Column(nullable = false)
     private LocalDateTime datePlanifiee;
@@ -57,6 +67,7 @@ public class Autopsie {
     @Builder.Default
     private StatutAutopsie statut = StatutAutopsie.PLANIFIEE;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "autopsie")
     private Facture facture;
 

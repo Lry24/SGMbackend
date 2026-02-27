@@ -22,6 +22,8 @@ public class EmplacementResponseDTO {
     // Dépouille occupant l'emplacement (si occupe = true)
     private Long depouilleId;
     private String identifiantUniqueDepouille;
+    private String nomDepouille;
+    private String prenomDepouille;
 
     private LocalDateTime createdAt;
 }

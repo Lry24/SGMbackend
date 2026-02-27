@@ -81,10 +81,8 @@ public class DepouilleController {
 
     @GetMapping("/{id}/historique")
     @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN')")
-    public ResponseEntity<Object> getHistorique(@PathVariable Long id) {
-        // Pour l'instant on retourne simplement l'objet, l'historique pourra être
-        // étendu
-        return ResponseEntity.ok(depouilleService.findById(id));
+    public ResponseEntity<DepouilleResponseDTO> getHistorique(@PathVariable Long id) {
+        return ResponseEntity.ok(depouilleMapper.toResponseDTO(depouilleService.findById(id)));
     }
 
     @GetMapping(value = "/{id}/qrcode", produces = MediaType.IMAGE_PNG_VALUE)

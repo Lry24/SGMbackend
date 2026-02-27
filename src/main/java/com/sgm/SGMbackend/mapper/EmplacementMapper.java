@@ -14,6 +14,8 @@ public interface EmplacementMapper {
     @Mapping(target = "chambreFroideNumero", source = "chambreFroide.numero")
     @Mapping(target = "depouilleId", source = "depouille.id")
     @Mapping(target = "identifiantUniqueDepouille", source = "depouille.identifiantUnique")
+    @Mapping(target = "nomDepouille", source = "depouille.nomDefunt")
+    @Mapping(target = "prenomDepouille", source = "depouille.prenomDefunt")
     EmplacementResponseDTO toResponseDTO(Emplacement entity);
 
     @Mapping(target = "id", ignore = true)

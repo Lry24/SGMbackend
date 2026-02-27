@@ -29,6 +29,14 @@ public class UtilisateurController {
         return ResponseEntity.ok(utilisateurService.findAll(pageable, role));
     }
 
+    @GetMapping("/medecins")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT')")
+    public ResponseEntity<?> getMedecins() {
+        return ResponseEntity.ok(utilisateurService.findAll(
+                org.springframework.data.domain.PageRequest.of(0, 500),
+                Role.MEDECIN).getContent());
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getById(@PathVariable String id) {

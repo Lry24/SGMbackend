@@ -142,6 +142,30 @@ public class AuthServiceImpl implements AuthService {
         return utilisateurMapper.toResponseDTO(u);
     }
 
+    @Override
+    public UtilisateurResponseDTO updateProfile(String nom, String prenom) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userId;
+        if (principal instanceof Utilisateur) {
+            userId = ((Utilisateur) principal).getId();
+        } else {
+            userId = principal.toString();
+        }
+
+        Utilisateur u = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable en base : " + userId));
+
+        if (nom != null && !nom.trim().isEmpty()) {
+            u.setNom(nom);
+        }
+        if (prenom != null && !prenom.trim().isEmpty()) {
+            u.setPrenom(prenom);
+        }
+
+        utilisateurRepository.save(u);
+        return utilisateurMapper.toResponseDTO(u);
+    }
+
     // ─── Change Password ──────────────────────────────────────────────────────
 
     @Override

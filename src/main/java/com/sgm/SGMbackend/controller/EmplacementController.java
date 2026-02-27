@@ -1,5 +1,6 @@
 package com.sgm.SGMbackend.controller;
 
+import com.sgm.SGMbackend.dto.dtoRequest.AffecterEmplacementDTO;
 import com.sgm.SGMbackend.dto.dtoResponse.EmplacementResponseDTO;
 import com.sgm.SGMbackend.entity.Emplacement;
 import com.sgm.SGMbackend.mapper.EmplacementMapper;
@@ -39,8 +40,9 @@ public class EmplacementController {
 
     @PostMapping("/affecter")
     @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
-    public ResponseEntity<EmplacementResponseDTO> affecter(@RequestBody Map<String, Long> body) {
-        Emplacement emp = emplacementService.affecter(body.get("depouillId"), body.get("emplacementId"));
+    public ResponseEntity<EmplacementResponseDTO> affecter(@RequestBody AffecterEmplacementDTO req) {
+        Emplacement emp = emplacementService.affecter(req.getDepouilleId(), req.getEmplacementId(),
+                req.getDateAffectation());
         return ResponseEntity.ok(emplacementMapper.toResponseDTO(emp));
     }
 

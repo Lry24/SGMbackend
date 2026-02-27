@@ -2,6 +2,7 @@ package com.sgm.SGMbackend.entity;
 
 import com.sgm.SGMbackend.entity.enums.StatutChambre;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -40,6 +41,7 @@ public class ChambreFroide {
     @Column(nullable = false)
     private StatutChambre statut = StatutChambre.OPERATIONNELLE;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "chambreFroide", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Emplacement> emplacements;
 

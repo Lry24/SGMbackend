@@ -26,7 +26,7 @@ public class AutopsieServiceImpl implements AutopsieService {
 
     @Override
     @Transactional
-    public Autopsie planifier(Long depouillId, String medecinId, LocalDateTime datePlanifiee) {
+    public Autopsie planifier(Long depouillId, String medecinId, LocalDateTime datePlanifiee, String salle) {
         var depouille = depouilleRepository.findById(depouillId)
                 .orElseThrow(() -> new ResourceNotFoundException("Dépouille introuvable : " + depouillId));
 
@@ -43,7 +43,13 @@ public class AutopsieServiceImpl implements AutopsieService {
                 .depouille(depouille)
                 .medecinId(medecinId)
                 .datePlanifiee(datePlanifiee)
+                .salle(salle)
                 .statut(StatutAutopsie.PLANIFIEE)
+                // Champs dénormalisés
+                .depouilleId(depouille.getId())
+                .nomDefunt(depouille.getNomDefunt())
+                .prenomDefunt(depouille.getPrenomDefunt())
+                .identifiantUniqueDepouille(depouille.getIdentifiantUnique())
                 .build();
         return autoRepository.save(a);
     }

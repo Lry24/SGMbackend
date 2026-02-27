@@ -1,5 +1,6 @@
 package com.sgm.SGMbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sgm.SGMbackend.entity.enums.StatutDepouille;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,6 +58,7 @@ public class Depouille {
     private StatutDepouille statut = StatutDepouille.RECUE;
 
     // Lien vers l'emplacement (chambre froide) — géré par DEV C
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emplacement_id")
     private Emplacement emplacement;

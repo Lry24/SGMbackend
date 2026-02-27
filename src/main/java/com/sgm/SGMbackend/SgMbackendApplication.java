@@ -14,3 +14,4 @@ public class SgMbackendApplication {
 		SpringApplication.run(SgMbackendApplication.class, args);
 	}
 }
+

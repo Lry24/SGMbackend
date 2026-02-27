@@ -39,6 +39,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.getCurrentUser());
     }
 
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(authService.updateProfile(body.get("nom"), body.get("prenom")));
+    }
+
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body) {
         authService.changePassword(body.get("oldPassword"), body.get("newPassword"));

@@ -24,7 +24,7 @@ public class EmplacementServiceImpl implements EmplacementService {
 
     @Override
     @Transactional
-    public Emplacement affecter(Long depouilleId, Long emplacementId) {
+    public Emplacement affecter(Long depouilleId, Long emplacementId, LocalDateTime date) {
         Emplacement emp = findById(emplacementId);
 
         // RÈGLE METIER 2 : vérifier que l'emplacement est libre
@@ -38,7 +38,7 @@ public class EmplacementServiceImpl implements EmplacementService {
         // Mettre à jour l'emplacement
         emp.setDepouille(d);
         emp.setOccupe(true);
-        emp.setDateAffectation(LocalDateTime.now());
+        emp.setDateAffectation(date != null ? date : LocalDateTime.now());
 
         // RÈGLE METIER 2 : Mettre à jour statut dépouille -> EN_CHAMBRE_FROIDE
         d.setStatut(StatutDepouille.EN_CHAMBRE_FROIDE);

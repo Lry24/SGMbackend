@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/bareme")
+@RequestMapping("/api/baremes")
 @RequiredArgsConstructor
 @Tag(name = "Gestion des Barèmes", description = "Endpoints pour la gestion de la tarification")
 public class BaremeController {
