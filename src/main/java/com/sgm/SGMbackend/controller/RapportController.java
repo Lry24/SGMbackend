@@ -20,7 +20,7 @@ public class RapportController {
     private final RapportService rapportService;
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE')")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN','COMPTABLE')")
     public ResponseEntity<Map<String, Object>> dashboard() {
         return ResponseEntity.ok(rapportService.getDashboardKpis());
     }

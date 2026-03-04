@@ -5,6 +5,7 @@ import com.sgm.SGMbackend.dto.dtoResponse.DepouilleResponseDTO;
 import com.sgm.SGMbackend.entity.Depouille;
 import com.sgm.SGMbackend.entity.enums.StatutDepouille;
 import com.sgm.SGMbackend.mapper.DepouilleMapper;
+import com.sgm.SGMbackend.service.BonReceptionService;
 import com.sgm.SGMbackend.service.DepouilleService;
 import com.sgm.SGMbackend.service.RestitutionService;
 import com.sgm.SGMbackend.dto.dtoResponse.FactureResponseDTO;
@@ -17,6 +18,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +42,10 @@ public class DepouilleController {
     private final FactureMapper factureMapper;
     private final MouvementDepouilleRepository mouvementRepo;
     private final MouvementDepouilleMapper mouvementMapper;
+    private final BonReceptionService bonReceptionService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN','COMPTABLE')")
     public ResponseEntity<Page<DepouilleResponseDTO>> findAll(
             Pageable pageable,
             @RequestParam(required = false) String search,
@@ -110,5 +114,18 @@ public class DepouilleController {
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
         depouilleService.supprimer(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/bon-reception")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN','COMPTABLE')")
+    public ResponseEntity<byte[]> getBonReception(@PathVariable Long id) {
+        byte[] pdf = bonReceptionService.genererBonReception(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("bon-reception-" + id + ".pdf")
+                        .build());
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 }
