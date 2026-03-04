@@ -46,6 +46,17 @@ public class RestitutionServiceImpl implements RestitutionService {
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Dépouille introuvable : " + requestDTO.getDepouilleId()));
 
+        // Nouveau : Vérifier que la facture est payée dès la planification
+        factureRepository.findByDepouille_Id(depouille.getId())
+                .ifPresentOrElse(f -> {
+                    if (f.getStatut() != StatutFacture.PAYEE) {
+                        throw new BusinessRuleException("La planification n'est possible que si la facture est PAYEE.");
+                    }
+                }, () -> {
+                    throw new BusinessRuleException(
+                            "Aucune facture trouvée pour cette dépouille. Le paiement est requis.");
+                });
+
         Famille famille = familleRepository.findById(requestDTO.getFamilleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Famille introuvable : " + requestDTO.getFamilleId()));
 

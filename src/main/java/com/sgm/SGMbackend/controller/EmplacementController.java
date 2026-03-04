@@ -39,7 +39,7 @@ public class EmplacementController {
     }
 
     @PostMapping("/affecter")
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','AGENT','RESPONSABLE')")
     public ResponseEntity<EmplacementResponseDTO> affecter(@RequestBody AffecterEmplacementDTO req) {
         Emplacement emp = emplacementService.affecter(req.getDepouilleId(), req.getEmplacementId(),
                 req.getDateAffectation());
@@ -47,7 +47,7 @@ public class EmplacementController {
     }
 
     @PatchMapping("/{id}/liberer")
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','AGENT','RESPONSABLE')")
     public ResponseEntity<EmplacementResponseDTO> liberer(@PathVariable Long id,
             @RequestBody Map<String, String> body) {
         Emplacement emp = emplacementService.liberer(id, body.get("motif"));

@@ -13,4 +13,12 @@ public interface MouvementCaisseRepository extends JpaRepository<MouvementCaisse
     List<MouvementCaisse> findByDateBetween(LocalDateTime debut, LocalDateTime fin);
 
     List<MouvementCaisse> findByFacture_Id(Long factureId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT m.modePaiement, COUNT(m) FROM MouvementCaisse m WHERE m.type = 'ENCAISSEMENT' GROUP BY m.modePaiement")
+    List<Object[]> countByModePaiement();
+
+    @org.springframework.data.jpa.repository.Query("SELECT CAST(m.date AS date), SUM(m.montant) FROM MouvementCaisse m WHERE m.type = 'ENCAISSEMENT' AND m.date BETWEEN :debut AND :fin GROUP BY CAST(m.date AS date) ORDER BY CAST(m.date AS date)")
+    List<Object[]> sumMontantByDateBetweenGroupedByDate(
+            @org.springframework.data.repository.query.Param("debut") LocalDateTime debut,
+            @org.springframework.data.repository.query.Param("fin") LocalDateTime fin);
 }

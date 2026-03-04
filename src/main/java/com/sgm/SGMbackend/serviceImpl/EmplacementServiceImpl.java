@@ -5,8 +5,10 @@ import com.sgm.SGMbackend.entity.Emplacement;
 import com.sgm.SGMbackend.entity.enums.StatutDepouille;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
+import com.sgm.SGMbackend.entity.MouvementDepouille;
 import com.sgm.SGMbackend.repository.DepouilleRepository;
 import com.sgm.SGMbackend.repository.EmplacementRepository;
+import com.sgm.SGMbackend.repository.MouvementDepouilleRepository;
 import com.sgm.SGMbackend.service.EmplacementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class EmplacementServiceImpl implements EmplacementService {
 
     private final EmplacementRepository emplacementRepo;
     private final DepouilleRepository depouilleRepo;
+    private final MouvementDepouilleRepository mouvementRepo;
 
     @Override
     @Transactional
@@ -45,6 +48,15 @@ public class EmplacementServiceImpl implements EmplacementService {
         d.setEmplacement(emp);
         depouilleRepo.save(d);
 
+        // Enregistrer le mouvement
+        mouvementRepo.save(MouvementDepouille.builder()
+                .depouille(d)
+                .description("Placée en chambre froide : Casier " + emp.getCode())
+                .dateMouvement(LocalDateTime.now())
+                .statut(StatutDepouille.EN_CHAMBRE_FROIDE)
+                .emplacement(emp)
+                .build());
+
         return emplacementRepo.save(emp);
     }
 
@@ -60,6 +72,13 @@ public class EmplacementServiceImpl implements EmplacementService {
             // On ne change pas le statut ici car il peut passer à EN_AUTOPSIE ou PREPAREE
             // via d'autres services
             depouilleRepo.save(d);
+
+            // Enregistrer le mouvement de sortie de casier
+            mouvementRepo.save(MouvementDepouille.builder()
+                    .depouille(d)
+                    .description("Sortie de chambre froide : " + motif)
+                    .dateMouvement(LocalDateTime.now())
+                    .build());
         }
 
         emp.setOccupe(false);

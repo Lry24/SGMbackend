@@ -29,4 +29,7 @@ public interface AutopsieRepository extends JpaRepository<Autopsie, Long> {
      */
     @Query("SELECT a FROM Autopsie a WHERE a.datePlanifiee BETWEEN :debut AND :fin ORDER BY a.datePlanifiee")
     List<Autopsie> findPlanning(@Param("debut") LocalDateTime debut, @Param("fin") LocalDateTime fin);
+
+    @Query("SELECT a.statut, COUNT(a) FROM Autopsie a GROUP BY a.statut")
+    List<Object[]> countByStatut();
 }

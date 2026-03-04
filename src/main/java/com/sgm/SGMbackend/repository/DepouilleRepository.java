@@ -29,4 +29,12 @@ public interface DepouilleRepository extends JpaRepository<Depouille, Long> {
         long countByStatutNot(StatutDepouille statut);
 
         long countByDateArriveeBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
+
+        @org.springframework.data.jpa.repository.Query("SELECT d.causePresumee, COUNT(d) FROM Depouille d GROUP BY d.causePresumee")
+        java.util.List<Object[]> countByCausePresumee();
+
+        @org.springframework.data.jpa.repository.Query("SELECT CAST(d.dateArrivee AS date), COUNT(d) FROM Depouille d WHERE d.dateArrivee BETWEEN :start AND :end GROUP BY CAST(d.dateArrivee AS date) ORDER BY CAST(d.dateArrivee AS date)")
+        java.util.List<Object[]> countByDateArriveeBetweenGroupedByDate(
+                        @org.springframework.data.repository.query.Param("start") java.time.LocalDateTime start,
+                        @org.springframework.data.repository.query.Param("end") java.time.LocalDateTime end);
 }

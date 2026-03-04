@@ -8,7 +8,9 @@ import com.sgm.SGMbackend.entity.Depouille;
 import com.sgm.SGMbackend.entity.enums.StatutDepouille;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
+import com.sgm.SGMbackend.entity.MouvementDepouille;
 import com.sgm.SGMbackend.repository.DepouilleRepository;
+import com.sgm.SGMbackend.repository.MouvementDepouilleRepository;
 import com.sgm.SGMbackend.service.DepouilleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,7 @@ import java.time.Year;
 public class DepouilleServiceImpl implements DepouilleService {
 
     private final DepouilleRepository depouilleRepository;
+    private final MouvementDepouilleRepository mouvementRepo;
 
     @Override
     @Transactional
@@ -38,7 +41,17 @@ public class DepouilleServiceImpl implements DepouilleService {
         }
 
         depouille.setStatut(StatutDepouille.RECUE);
-        return depouilleRepository.save(depouille);
+        Depouille saved = depouilleRepository.save(depouille);
+
+        // Enregistrer le mouvement initial
+        mouvementRepo.save(MouvementDepouille.builder()
+                .depouille(saved)
+                .description("Admission de la dépouille")
+                .dateMouvement(LocalDateTime.now())
+                .statut(StatutDepouille.RECUE)
+                .build());
+
+        return saved;
     }
 
     @Override
@@ -48,7 +61,17 @@ public class DepouilleServiceImpl implements DepouilleService {
         // RÈGLE 2 — Workflow statut (transitions autorisées)
         validerTransition(d.getStatut(), nouveauStatut);
         d.setStatut(nouveauStatut);
-        return depouilleRepository.save(d);
+        Depouille saved = depouilleRepository.save(d);
+
+        // Enregistrer le changement de statut
+        mouvementRepo.save(MouvementDepouille.builder()
+                .depouille(saved)
+                .description("Changement de statut : " + nouveauStatut)
+                .dateMouvement(LocalDateTime.now())
+                .statut(nouveauStatut)
+                .build());
+
+        return saved;
     }
 
     @Override

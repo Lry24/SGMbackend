@@ -8,7 +8,10 @@ import com.sgm.SGMbackend.mapper.DepouilleMapper;
 import com.sgm.SGMbackend.service.DepouilleService;
 import com.sgm.SGMbackend.service.RestitutionService;
 import com.sgm.SGMbackend.dto.dtoResponse.FactureResponseDTO;
+import com.sgm.SGMbackend.dto.dtoResponse.MouvementDepouilleResponseDTO;
 import com.sgm.SGMbackend.mapper.FactureMapper;
+import com.sgm.SGMbackend.mapper.MouvementDepouilleMapper;
+import com.sgm.SGMbackend.repository.MouvementDepouilleRepository;
 import com.sgm.SGMbackend.service.FactureService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +37,8 @@ public class DepouilleController {
     private final RestitutionService restitutionService;
     private final FactureService factureService;
     private final FactureMapper factureMapper;
+    private final MouvementDepouilleRepository mouvementRepo;
+    private final MouvementDepouilleMapper mouvementMapper;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN')")
@@ -54,7 +59,7 @@ public class DepouilleController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','AGENT','RESPONSABLE')")
     public ResponseEntity<DepouilleResponseDTO> enregistrer(@RequestBody @Valid DepouilleRequestDTO dto) {
         Depouille depouille = depouilleMapper.toEntity(dto);
         Depouille saved = depouilleService.enregistrer(depouille);
@@ -81,12 +86,15 @@ public class DepouilleController {
 
     @GetMapping("/{id}/historique")
     @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN')")
-    public ResponseEntity<DepouilleResponseDTO> getHistorique(@PathVariable Long id) {
-        return ResponseEntity.ok(depouilleMapper.toResponseDTO(depouilleService.findById(id)));
+    public ResponseEntity<java.util.List<MouvementDepouilleResponseDTO>> getHistorique(@PathVariable Long id) {
+        return ResponseEntity.ok(mouvementRepo.findByDepouilleIdOrderByDateMouvementDesc(id)
+                .stream()
+                .map(mouvementMapper::toResponseDTO)
+                .toList());
     }
 
     @GetMapping(value = "/{id}/qrcode", produces = MediaType.IMAGE_PNG_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','AGENT','RESPONSABLE')")
     public ResponseEntity<byte[]> getQRCode(@PathVariable Long id) {
         return ResponseEntity.ok(depouilleService.getQRCode(id));
     }
