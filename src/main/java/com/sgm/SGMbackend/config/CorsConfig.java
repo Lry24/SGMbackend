@@ -25,9 +25,8 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Origines autorisées depuis la config (ex:
-        // http://localhost:3000,http://localhost:5173)
-        config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        // Autoriser toutes les origines (*)
+        config.setAllowedOrigins(List.of("*"));
 
         // Méthodes HTTP autorisées
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -35,11 +34,11 @@ public class CorsConfig {
         // Tous les headers autorisés (Authorization, Content-Type, etc.)
         config.setAllowedHeaders(List.of("*"));
 
-        // Autoriser l'envoi de cookies/credentials
-        config.setAllowCredentials(true);
+        // allowCredentials doit être false si on utilise "*"
+        config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/**", config);
 
         return new CorsFilter(source);
     }
