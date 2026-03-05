@@ -28,12 +28,10 @@ public class Facture {
 
     private LocalDateTime dateEmission; // Ajouté pour conformité diagramme
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "famille_id", nullable = false)
     private Famille famille;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "depouille_id")
     private Depouille depouille;

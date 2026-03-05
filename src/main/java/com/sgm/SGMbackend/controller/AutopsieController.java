@@ -43,6 +43,15 @@ public class AutopsieController {
         return ResponseEntity.status(201).body(autoService.planifier(depouillId, medecinId, date, salle));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE')")
+    public ResponseEntity<?> modifier(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        String medecinId = body.get("medecinId").toString();
+        LocalDateTime date = LocalDateTime.parse(body.get("datePlanifiee").toString());
+        String salle = body.get("salle") != null ? body.get("salle").toString() : null;
+        return ResponseEntity.ok(autoService.modifier(id, medecinId, date, salle));
+    }
+
     @PatchMapping("/{id}/demarrer")
     @PreAuthorize("hasAnyRole('ADMIN','MEDECIN')")
     public ResponseEntity<?> demarrer(@PathVariable Long id) {

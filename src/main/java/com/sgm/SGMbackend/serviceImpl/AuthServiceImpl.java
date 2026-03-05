@@ -2,11 +2,13 @@ package com.sgm.SGMbackend.serviceImpl;
 
 import com.sgm.SGMbackend.config.SupabaseConfig;
 import com.sgm.SGMbackend.dto.dtoResponse.UtilisateurResponseDTO;
+import com.sgm.SGMbackend.entity.enums.GraviteAudit;
 import com.sgm.SGMbackend.entity.Utilisateur;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
 import com.sgm.SGMbackend.mapper.UtilisateurMapper;
 import com.sgm.SGMbackend.repository.UtilisateurRepository;
+import com.sgm.SGMbackend.service.AuditLogService;
 import com.sgm.SGMbackend.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final UtilisateurMapper utilisateurMapper;
     private final RestTemplate restTemplate;
     private final com.sgm.SGMbackend.service.UtilisateurService utilisateurService;
+    private final AuditLogService auditLogService;
 
     /**
      * Authentifie un utilisateur via l'API REST de Supabase Auth.
@@ -74,10 +77,23 @@ public class AuthServiceImpl implements AuthService {
                 if (responseBody != null) {
                     responseBody.put("must_change_password", u.getDoitChangerMotDePasse());
                 }
+
+                auditLogService.log(
+                        u.getNom() + " " + u.getPrenom(),
+                        "CONNEXION_RÉUSSIE",
+                        "SÉCURITÉ",
+                        "Authentification réussie pour: " + email,
+                        GraviteAudit.INFO);
             });
 
             return responseBody;
         } catch (HttpClientErrorException e) {
+            auditLogService.log(
+                    "INCONNU",
+                    "ÉCHEC_CONNEXION",
+                    "SÉCURITÉ",
+                    "Tentative de connexion échouée pour: " + email,
+                    GraviteAudit.WARNING);
             throw new BusinessRuleException("Identifiants invalides.");
         }
     }
@@ -194,6 +210,13 @@ public class AuthServiceImpl implements AuthService {
                 Utilisateur u = (Utilisateur) principal;
                 u.setDoitChangerMotDePasse(false);
                 utilisateurRepository.save(u);
+
+                auditLogService.log(
+                        u.getNom() + " " + u.getPrenom(),
+                        "CHANGEMENT_MOT_DE_PASSE",
+                        "SÉCURITÉ",
+                        "Mot de passe mis à jour avec succès",
+                        GraviteAudit.INFO);
             }
         } catch (HttpClientErrorException e) {
             log.error("Erreur Supabase lors du changement de mot de passe : {} - Body: {}",

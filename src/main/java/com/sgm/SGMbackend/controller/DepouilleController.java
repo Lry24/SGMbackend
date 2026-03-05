@@ -52,14 +52,31 @@ public class DepouilleController {
             @RequestParam(required = false) StatutDepouille statut) {
         Page<DepouilleResponseDTO> result = depouilleService
                 .findAll(pageable, search, statut)
-                .map(depouilleMapper::toResponseDTO);
+                .map(d -> {
+                    DepouilleResponseDTO dto = depouilleMapper.toResponseDTO(d);
+                    com.sgm.SGMbackend.entity.Facture f = factureService.findByDepouille(d.getId());
+                    if (f != null) {
+                        dto.setStatutPaiement(f.getStatut().name());
+                    } else {
+                        dto.setStatutPaiement("AUCUNE");
+                    }
+                    return dto;
+                });
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN')")
     public ResponseEntity<DepouilleResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(depouilleMapper.toResponseDTO(depouilleService.findById(id)));
+        Depouille d = depouilleService.findById(id);
+        DepouilleResponseDTO dto = depouilleMapper.toResponseDTO(d);
+        com.sgm.SGMbackend.entity.Facture f = factureService.findByDepouille(d.getId());
+        if (f != null) {
+            dto.setStatutPaiement(f.getStatut().name());
+        } else {
+            dto.setStatutPaiement("AUCUNE");
+        }
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping

@@ -25,4 +25,6 @@ public interface RestitutionService {
     List<RestitutionResponseDTO> getPlanning(LocalDateTime date);
 
     com.sgm.SGMbackend.dto.dtoResponse.FactureResponseDTO getFactureByDepouille(Long depouilleId);
+
+    byte[] genererAttestationRestitution(Long id);
 }

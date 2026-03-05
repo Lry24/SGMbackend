@@ -19,5 +19,7 @@ public class MouvementCaisseResponseDTO {
     private String libelle;
     private Long factureId;
     private String factureNumero;
+    private String familleNom;
+    private String defuntNom;
     private LocalDateTime createdAt;
 }

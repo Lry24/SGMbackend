@@ -20,6 +20,8 @@ public interface AutopsieRepository extends JpaRepository<Autopsie, Long> {
      */
     boolean existsByDepouille_IdAndStatutIn(Long depouillId, Collection<StatutAutopsie> statuts);
 
+    boolean existsByDepouille_Id(Long depouilleId);
+
     Page<Autopsie> findByStatut(StatutAutopsie statut, Pageable pageable);
 
     List<Autopsie> findByMedecinId(String medecinId);

@@ -7,6 +7,7 @@ import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
 import com.sgm.SGMbackend.repository.AutopsieRepository;
 import com.sgm.SGMbackend.repository.DepouilleRepository;
+import com.sgm.SGMbackend.repository.UtilisateurRepository;
 import com.sgm.SGMbackend.service.AutopsieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ public class AutopsieServiceImpl implements AutopsieService {
 
     private final AutopsieRepository autoRepository;
     private final DepouilleRepository depouilleRepository;
+    private final UtilisateurRepository utilisateurRepository;
 
     @Override
     @Transactional
@@ -39,6 +41,9 @@ public class AutopsieServiceImpl implements AutopsieService {
         depouille.setStatut(StatutDepouille.EN_AUTOPSIE);
         depouilleRepository.save(depouille);
 
+        var medecin = utilisateurRepository.findById(medecinId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable : " + medecinId));
+
         Autopsie a = Autopsie.builder()
                 .depouille(depouille)
                 .medecinId(medecinId)
@@ -50,6 +55,7 @@ public class AutopsieServiceImpl implements AutopsieService {
                 .nomDefunt(depouille.getNomDefunt())
                 .prenomDefunt(depouille.getPrenomDefunt())
                 .identifiantUniqueDepouille(depouille.getIdentifiantUnique())
+                .nomMedecin(medecin.getNomComplet())
                 .build();
         return autoRepository.save(a);
     }
@@ -138,5 +144,24 @@ public class AutopsieServiceImpl implements AutopsieService {
         LocalDateTime debut = date.with(LocalTime.MIN);
         LocalDateTime fin = date.with(LocalTime.MAX);
         return autoRepository.findPlanning(debut, fin);
+    }
+
+    @Override
+    @Transactional
+    public Autopsie modifier(Long id, String medecinId, LocalDateTime datePlanifiee, String salle) {
+        Autopsie a = findById(id);
+        if (a.getStatut() != StatutAutopsie.PLANIFIEE) {
+            throw new BusinessRuleException("Seule une autopsie PLANIFIEE peut être modifiée.");
+        }
+
+        var medecin = utilisateurRepository.findById(medecinId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable : " + medecinId));
+
+        a.setMedecinId(medecinId);
+        a.setNomMedecin(medecin.getNomComplet());
+        a.setDatePlanifiee(datePlanifiee);
+        a.setSalle(salle);
+
+        return autoRepository.save(a);
     }
 }

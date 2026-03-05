@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 @Builder
 public class RestitutionRequestDTO {
 
-    @NotNull(message = "L'identifiant de la dépouille est obligatoire")
+    private String numeroFacture;
+
     private Long depouilleId;
 
-    @NotNull(message = "L'identifiant de la famille est obligatoire")
     private Long familleId;
 
     @NotNull(message = "La date planifiée est obligatoire")

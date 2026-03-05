@@ -42,19 +42,19 @@ public class RestitutionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE', 'AGENT')")
     public ResponseEntity<RestitutionResponseDTO> planifier(@Valid @RequestBody RestitutionRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(restitutionService.planifier(dto));
     }
 
     @PatchMapping("/{id}/confirmer")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE', 'AGENT')")
     public ResponseEntity<RestitutionResponseDTO> confirmer(@PathVariable Long id) {
         return ResponseEntity.ok(restitutionService.confirmer(id));
     }
 
     @PatchMapping("/{id}/annuler")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE', 'AGENT')")
     public ResponseEntity<Void> annuler(@PathVariable Long id, @RequestBody Map<String, String> body) {
         restitutionService.annuler(id, body != null ? body.get("motif") : null);
         return ResponseEntity.ok().build();
@@ -74,5 +74,15 @@ public class RestitutionController {
     public ResponseEntity<List<RestitutionResponseDTO>> planning(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
         return ResponseEntity.ok(restitutionService.getPlanning(date != null ? date : LocalDateTime.now()));
+    }
+
+    @GetMapping("/{id}/attestation")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<byte[]> downloadAttestation(@PathVariable Long id) {
+        byte[] pdf = restitutionService.genererAttestationRestitution(id);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=\"attestation_restitution_" + id + ".pdf\"")
+                .body(pdf);
     }
 }

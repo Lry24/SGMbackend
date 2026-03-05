@@ -46,7 +46,7 @@ public class AlerteController {
     }
 
     @PatchMapping("/{id}/acquitter")
-    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT','MEDECIN')")
     public ResponseEntity<Void> acquitter(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {

@@ -25,4 +25,6 @@ public interface AutopsieService {
     List<Autopsie> findByMedecin(String medecinId);
 
     List<Autopsie> getPlanning(LocalDateTime date);
+
+    Autopsie modifier(Long id, String medecinId, LocalDateTime datePlanifiee, String salle);
 }

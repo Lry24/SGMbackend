@@ -8,6 +8,8 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import com.nimbusds.jose.util.DefaultResourceRetriever;
+import com.nimbusds.jose.util.ResourceRetriever;
 import com.sgm.SGMbackend.entity.Utilisateur;
 import com.sgm.SGMbackend.repository.UtilisateurRepository;
 import jakarta.servlet.FilterChain;
@@ -46,6 +48,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
+    private ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
+    private com.auth0.jwt.algorithms.Algorithm hmacAlgorithm;
+
+    private synchronized void initJwtProcessors() {
+        if (jwtProcessor != null)
+            return;
+        try {
+            // Configuration ES256 (JWKS) avec timeout augmenté (10s)
+            String jwksUrl = supabaseUrl + "/auth/v1/.well-known/jwks.json";
+            ResourceRetriever retriever = new DefaultResourceRetriever(10000, 10000);
+            JWKSource<SecurityContext> keySource = new RemoteJWKSet<>(new URL(jwksUrl), retriever);
+            jwtProcessor = new DefaultJWTProcessor<>();
+            jwtProcessor.setJWSKeySelector(new JWSVerificationKeySelector<>(JWSAlgorithm.ES256, keySource));
+
+            // Configuration HS256 (Shared Secret)
+            hmacAlgorithm = com.auth0.jwt.algorithms.Algorithm.HMAC256(jwtSecret);
+            log.info("[JwtAuthFilter] Processeurs JWT initialisés pour {}", supabaseUrl);
+        } catch (Exception e) {
+            log.error("[JwtAuthFilter] Erreur init JWT : {}", e.getMessage());
+        }
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
@@ -58,6 +82,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
+
+        if (jwtProcessor == null)
+            initJwtProcessors();
 
         try {
             String token = header.substring(7);
@@ -73,24 +100,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Utilisateur user = utilisateurRepository.findById(userId).orElse(null);
 
             if (user == null || !Boolean.TRUE.equals(user.getActif())) {
-                // Compte inexistant ou désactivé → rejet même avec token valide
                 SecurityContextHolder.clearContext();
                 chain.doFilter(request, response);
                 return;
             }
 
-            // Rôle lu depuis la DB → effectif immédiatement après changement
             String roleFromDb = user.getRole().name();
-
             var auth = new UsernamePasswordAuthenticationToken(
                     user,
-                    token, // On stocke le token brut ici pour pouvoir le réutiliser dans les services
+                    token,
                     List.of(new SimpleGrantedAuthority("ROLE_" + roleFromDb)));
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
         } catch (Exception e) {
-            log.debug("JWT invalide ou expiré : {}", e.getMessage());
+            log.warn("[JwtAuthFilter] ❌ Erreur Auth pour {}: {}", request.getRequestURI(), e.getMessage());
             SecurityContextHolder.clearContext();
         }
 
@@ -102,31 +126,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * puis HMAC256 (projets anciens). Retourne le subject (user UUID) ou null.
      */
     private String verifyTokenAndGetSubject(String token) {
-        // Tentative 1 : vérification via JWKS endpoint (ES256 — projets récents)
+        if (token == null || token.length() < 10)
+            return null;
+
         try {
-            String jwksUrl = supabaseUrl + "/auth/v1/.well-known/jwks.json";
-            JWKSource<SecurityContext> keySource = new RemoteJWKSet<>(new URL(jwksUrl));
+            // Décodage sans vérification pour lire l'algorithme
+            com.auth0.jwt.interfaces.DecodedJWT decoded = com.auth0.jwt.JWT.decode(token);
+            String alg = decoded.getAlgorithm();
 
-            ConfigurableJWTProcessor<SecurityContext> processor = new DefaultJWTProcessor<>();
-            processor.setJWSKeySelector(new JWSVerificationKeySelector<>(JWSAlgorithm.ES256, keySource));
-
-            JWTClaimsSet claims = processor.process(token, null);
-            return claims.getSubject();
+            if ("ES256".equals(alg)) {
+                log.info("[JwtAuthFilter] Validation ES256 via JWKS...");
+                JWTClaimsSet claims = jwtProcessor.process(token, null);
+                return claims.getSubject();
+            } else {
+                log.info("[JwtAuthFilter] Validation {} via Secret Local...", alg);
+                com.auth0.jwt.interfaces.DecodedJWT verified = com.auth0.jwt.JWT
+                        .require(hmacAlgorithm)
+                        .build()
+                        .verify(token);
+                return verified.getSubject();
+            }
         } catch (Exception e) {
-            log.debug("Échec JWKS/ES256, tentative HMAC256 : {}", e.getMessage());
+            log.error("[JwtAuthFilter] ❌ Validation échouée: {}", e.getMessage());
+            return null;
         }
-
-        // Tentative 2 : vérification HMAC256 (projets Supabase anciens)
-        try {
-            com.auth0.jwt.interfaces.DecodedJWT jwt = com.auth0.jwt.JWT
-                    .require(com.auth0.jwt.algorithms.Algorithm.HMAC256(jwtSecret))
-                    .build()
-                    .verify(token);
-            return jwt.getSubject();
-        } catch (Exception e) {
-            log.debug("Échec HMAC256 : {}", e.getMessage());
-        }
-
-        return null;
     }
 }

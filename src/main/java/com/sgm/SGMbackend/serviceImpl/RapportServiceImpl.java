@@ -21,6 +21,7 @@ public class RapportServiceImpl implements RapportService {
     private final AlerteRepository alerteRepo;
     private final MouvementCaisseRepository mouvementRepo;
     private final AutopsieRepository autopsieRepo;
+    private final com.sgm.SGMbackend.mapper.MouvementCaisseMapper mouvementMapper;
 
     @Override
     public Map<String, Object> getDashboardKpis() {
@@ -74,12 +75,18 @@ public class RapportServiceImpl implements RapportService {
     @Override
     public Map<String, Object> getFinancier(String periode, Integer annee, Integer mois) {
         Map<String, Object> data = new HashMap<>();
-        Double total = factureRepo.sumTotalRecettes();
-        data.put("totalEncaisse", total != null ? total : 0.0);
 
-        // Simulating some targets
-        data.put("totalFacture", (total != null ? total : 0.0) * 1.2);
-        data.put("tauxRecouvrement", 85);
+        Double totalEncaisse = factureRepo.sumTotalEncaisse();
+        Double totalFacture = factureRepo.sumTotalFacture();
+
+        data.put("totalEncaisse", totalEncaisse != null ? totalEncaisse : 0.0);
+        data.put("totalFacture", totalFacture != null ? totalFacture : 0.0);
+
+        double taux = 0.0;
+        if (totalFacture != null && totalFacture > 0) {
+            taux = (totalEncaisse != null ? totalEncaisse : 0.0) / totalFacture * 100;
+        }
+        data.put("tauxRecouvrement", Math.round(taux * 10.0) / 10.0);
 
         LocalDateTime now = LocalDateTime.now();
         data.put("recettesTrend", mouvementRepo.sumMontantByDateBetweenGroupedByDate(now.minusMonths(1), now));
@@ -87,7 +94,15 @@ public class RapportServiceImpl implements RapportService {
 
         // Dernières transactions (Top 5)
         data.put("dernieresTransactions", mouvementRepo.findAll(org.springframework.data.domain.PageRequest.of(0, 5,
-                org.springframework.data.domain.Sort.by("date").descending())).getContent());
+                org.springframework.data.domain.Sort.by("date").descending()))
+                .getContent()
+                .stream()
+                .map(mouvementMapper::toResponseDTO)
+                .collect(java.util.stream.Collectors.toList()));
+
+        // Transactions du jour
+        LocalDateTime startOfDay = now.toLocalDate().atStartOfDay();
+        data.put("transactionsJour", mouvementRepo.countByDateBetweenAndType(startOfDay, now, "ENCAISSEMENT"));
 
         return data;
     }

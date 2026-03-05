@@ -21,4 +21,6 @@ public interface MouvementCaisseRepository extends JpaRepository<MouvementCaisse
     List<Object[]> sumMontantByDateBetweenGroupedByDate(
             @org.springframework.data.repository.query.Param("debut") LocalDateTime debut,
             @org.springframework.data.repository.query.Param("fin") LocalDateTime fin);
+
+    long countByDateBetweenAndType(LocalDateTime debut, LocalDateTime fin, String type);
 }

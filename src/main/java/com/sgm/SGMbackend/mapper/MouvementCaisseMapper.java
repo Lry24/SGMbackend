@@ -9,5 +9,7 @@ import org.mapstruct.Mapping;
 public interface MouvementCaisseMapper {
     @Mapping(target = "factureId", source = "facture.id")
     @Mapping(target = "factureNumero", source = "facture.numero")
+    @Mapping(target = "familleNom", source = "facture.famille.tuteurLegal")
+    @Mapping(target = "defuntNom", source = "facture.depouille.nomDefunt")
     MouvementCaisseResponseDTO toResponseDTO(MouvementCaisse entity);
 }

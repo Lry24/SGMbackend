@@ -56,10 +56,11 @@ public class FactureController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','COMPTABLE')")
-    public ResponseEntity<List<FactureResponseDTO>> getAll() {
-        return ResponseEntity.ok(factureService.findAll().stream()
-                .map(factureMapper::toResponseDTO)
-                .collect(Collectors.toList()));
+    public ResponseEntity<org.springframework.data.domain.Page<FactureResponseDTO>> getAll(
+            org.springframework.data.domain.Pageable pageable,
+            @RequestParam(required = false) com.sgm.SGMbackend.entity.enums.StatutFacture statut) {
+        return ResponseEntity.ok(factureService.findAll(pageable, statut)
+                .map(factureMapper::toResponseDTO));
     }
 
     @PostMapping("/calculer")
@@ -74,8 +75,15 @@ public class FactureController {
             @PathVariable Long id,
             @RequestBody Map<String, Object> payload) {
 
-        Double montant = Double.valueOf(payload.get("montant").toString());
-        String mode = payload.get("mode").toString();
+        Object montantObj = payload.get("montant");
+        Object modeObj = payload.get("mode");
+
+        if (montantObj == null) {
+            throw new com.sgm.SGMbackend.exception.BusinessRuleException("Le montant est obligatoire.");
+        }
+
+        Double montant = Double.valueOf(montantObj.toString());
+        String mode = modeObj != null ? modeObj.toString() : "ESPECES";
         String reference = payload.getOrDefault("reference", "").toString();
 
         Facture f = factureService.enregistrerPaiement(id, montant, mode, reference);
@@ -97,8 +105,16 @@ public class FactureController {
         return ResponseEntity.ok(factureMapper.toResponseDTO(factureService.annuler(id, payload.get("motif"))));
     }
 
+    @PatchMapping("/{id}/statut")
+    @PreAuthorize("hasAnyRole('ADMIN','COMPTABLE')")
+    public ResponseEntity<FactureResponseDTO> updateStatut(
+            @PathVariable Long id,
+            @RequestBody Map<String, com.sgm.SGMbackend.entity.enums.StatutFacture> body) {
+        return ResponseEntity.ok(factureMapper.toResponseDTO(factureService.updateStatut(id, body.get("statut"))));
+    }
+
     @GetMapping("/depouilles/{id}/facture")
-    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','COMPTABLE')")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','COMPTABLE','AGENT')")
     public ResponseEntity<FactureResponseDTO> getByDepouille(@PathVariable Long id) {
         return ResponseEntity.ok(factureMapper.toResponseDTO(factureService.findByDepouille(id)));
     }
@@ -132,5 +148,11 @@ public class FactureController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"facture_" + f.getNumero() + ".pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
+    }
+
+    @GetMapping("/numero/{numero}")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','COMPTABLE','AGENT')")
+    public ResponseEntity<FactureResponseDTO> getByNumero(@PathVariable String numero) {
+        return ResponseEntity.ok(factureMapper.toResponseDTO(factureService.findByNumero(numero)));
     }
 }

@@ -91,12 +91,34 @@ public class ComptabiliteServiceImpl implements ComptabiliteService {
 
     @Override
     public Map<String, Double> getGrandLivre(String periode) {
-        return new HashMap<>();
+        // Pour simplifier, on aggrège par mode de paiement sur tous les mouvements
+        List<MouvementCaisse> mouvements = mouvementRepository.findAll();
+        Map<String, Double> grandLivre = new HashMap<>();
+
+        for (MouvementCaisse m : mouvements) {
+            String cle = m.getModePaiement() != null ? m.getModePaiement() : "AUTRE";
+            grandLivre.put(cle, grandLivre.getOrDefault(cle, 0.0) + m.getMontant());
+        }
+        return grandLivre;
     }
 
     @Override
     public Map<String, Double> getBalance(String periode) {
-        return new HashMap<>();
+        List<MouvementCaisse> mouvements = mouvementRepository.findAll();
+        double totalEncaisse = mouvements.stream()
+                .filter(m -> "ENCAISSEMENT".equals(m.getType()))
+                .mapToDouble(MouvementCaisse::getMontant).sum();
+
+        double totalDecaisse = mouvements.stream()
+                .filter(m -> "DECAISSEMENT".equals(m.getType()))
+                .mapToDouble(MouvementCaisse::getMontant).sum();
+
+        Map<String, Double> balance = new HashMap<>();
+        balance.put("TOTAL_ENCAISSEMENTS", totalEncaisse);
+        balance.put("TOTAL_DECAISSEMENTS", totalDecaisse);
+        balance.put("SOLDE_NET", totalEncaisse - totalDecaisse);
+
+        return balance;
     }
 
     @Override

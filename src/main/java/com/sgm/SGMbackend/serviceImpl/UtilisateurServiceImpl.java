@@ -7,8 +7,10 @@ import com.sgm.SGMbackend.entity.Utilisateur;
 import com.sgm.SGMbackend.entity.enums.Role;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
+import com.sgm.SGMbackend.entity.enums.GraviteAudit;
 import com.sgm.SGMbackend.mapper.UtilisateurMapper;
 import com.sgm.SGMbackend.repository.UtilisateurRepository;
+import com.sgm.SGMbackend.service.AuditLogService;
 import com.sgm.SGMbackend.service.UtilisateurService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final UtilisateurMapper utilisateurMapper;
     private final SupabaseConfig supabaseConfig;
     private final RestTemplate restTemplate;
+    private final AuditLogService auditLogService;
 
     // ─── List ─────────────────────────────────────────────────────────────────
 
@@ -77,7 +80,16 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 .doitChangerMotDePasse(true)
                 .build();
 
-        return utilisateurMapper.toResponseDTO(utilisateurRepository.save(utilisateur));
+        Utilisateur saved = utilisateurRepository.save(utilisateur);
+
+        auditLogService.log(
+                "SYSTÈME",
+                "CRÉATION_COMPTE",
+                "ADMINISTRATION",
+                "Nouvel utilisateur: " + dto.getEmail() + " (" + dto.getRole() + ")",
+                GraviteAudit.INFO);
+
+        return utilisateurMapper.toResponseDTO(saved);
     }
 
     // ─── Update ───────────────────────────────────────────────────────────────
@@ -93,7 +105,16 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         u.setEmail(dto.getEmail());
         u.setRole(dto.getRole());
 
-        return utilisateurMapper.toResponseDTO(utilisateurRepository.save(u));
+        Utilisateur saved = utilisateurRepository.save(u);
+
+        auditLogService.log(
+                "SYSTÈME",
+                "MODIFICATION_PROFIL",
+                "ADMINISTRATION",
+                "Profil mis à jour: " + u.getEmail(),
+                GraviteAudit.INFO);
+
+        return utilisateurMapper.toResponseDTO(saved);
     }
 
     // ─── SetActif ─────────────────────────────────────────────────────────────
@@ -108,6 +129,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         // Bloquer/débloquer également dans Supabase
         updateSupabaseUserBan(id, !actif);
+
+        auditLogService.log(
+                "SYSTÈME",
+                actif ? "ACTIVATION_COMPTE" : "DÉSACTIVATION_COMPTE",
+                "ADMINISTRATION",
+                "Statut changé pour: " + u.getEmail(),
+                actif ? GraviteAudit.INFO : GraviteAudit.WARNING);
     }
 
     // ─── Reset Password ───────────────────────────────────────────────────────
@@ -150,6 +178,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         // 2. Supprimer de la base locale
         utilisateurRepository.delete(u);
+
+        auditLogService.log(
+                "SYSTÈME",
+                "SUPPRESSION_COMPTE",
+                "ADMINISTRATION",
+                "Utilisateur supprimé: " + u.getEmail(),
+                GraviteAudit.WARNING);
     }
 
     // ─── Helpers Supabase ─────────────────────────────────────────────────────
