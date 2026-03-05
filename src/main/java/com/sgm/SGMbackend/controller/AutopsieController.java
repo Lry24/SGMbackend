@@ -8,12 +8,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/autopsies")
 @RequiredArgsConstructor
+@Tag(name = "Gestion des Autopsies", description = "Endpoints pour la gestion des rapports d'autopsie")
 public class AutopsieController {
 
     private final AutopsieService autoService;
@@ -37,7 +39,17 @@ public class AutopsieController {
         Long depouillId = Long.valueOf(body.get("depouillId").toString());
         String medecinId = body.get("medecinId").toString();
         LocalDateTime date = LocalDateTime.parse(body.get("datePlanifiee").toString());
-        return ResponseEntity.status(201).body(autoService.planifier(depouillId, medecinId, date));
+        String salle = body.get("salle") != null ? body.get("salle").toString() : null;
+        return ResponseEntity.status(201).body(autoService.planifier(depouillId, medecinId, date, salle));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE')")
+    public ResponseEntity<?> modifier(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        String medecinId = body.get("medecinId").toString();
+        LocalDateTime date = LocalDateTime.parse(body.get("datePlanifiee").toString());
+        String salle = body.get("salle") != null ? body.get("salle").toString() : null;
+        return ResponseEntity.ok(autoService.modifier(id, medecinId, date, salle));
     }
 
     @PatchMapping("/{id}/demarrer")

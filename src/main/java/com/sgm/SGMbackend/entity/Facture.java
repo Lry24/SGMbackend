@@ -1,5 +1,6 @@
 package com.sgm.SGMbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sgm.SGMbackend.entity.enums.StatutFacture;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,6 +36,7 @@ public class Facture {
     @JoinColumn(name = "depouille_id")
     private Depouille depouille;
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "autopsie_id")
     private Autopsie autopsie;
@@ -51,6 +53,7 @@ public class Facture {
     @Builder.Default
     private StatutFacture statut = StatutFacture.BROUILLON;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "facture", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<LigneFacture> lignes = new ArrayList<>();

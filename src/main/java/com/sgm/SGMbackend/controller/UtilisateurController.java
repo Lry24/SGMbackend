@@ -11,11 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/utilisateurs")
 @RequiredArgsConstructor
+@Tag(name = "Gestion des Utilisateurs", description = "Endpoints pour l'administration des comptes et des rôles")
 public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
@@ -25,6 +27,14 @@ public class UtilisateurController {
     public ResponseEntity<?> list(Pageable pageable,
             @RequestParam(required = false) Role role) {
         return ResponseEntity.ok(utilisateurService.findAll(pageable, role));
+    }
+
+    @GetMapping("/medecins")
+    @PreAuthorize("hasAnyRole('ADMIN','RESPONSABLE','AGENT')")
+    public ResponseEntity<?> getMedecins() {
+        return ResponseEntity.ok(utilisateurService.findAll(
+                org.springframework.data.domain.PageRequest.of(0, 500),
+                Role.MEDECIN).getContent());
     }
 
     @GetMapping("/{id}")

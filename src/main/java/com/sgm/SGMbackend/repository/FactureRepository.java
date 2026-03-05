@@ -11,14 +11,27 @@ import java.util.Optional;
 
 /**
  * Repository pour l'entité Facture.
- * La méthode findByDepouille_Id est utilisée par RestitutionService
+ * La méthode findByDepouilleId est utilisée par RestitutionService
  * pour vérifier que la facture est soldée avant de confirmer la restitution.
  */
 public interface FactureRepository extends JpaRepository<Facture, Long> {
 
-    Optional<Facture> findByDepouille_Id(Long depouillId);
+    List<Facture> findByDepouilleId(Long depouilleId);
+
+    Optional<Facture> findByNumero(String numero);
+
+    Page<Facture> findByStatut(StatutFacture statut, Pageable pageable);
 
     Page<Facture> findByStatutAndFamille_Id(StatutFacture statut, Long familleId, Pageable pageable);
 
-    List<Facture> findByStatutIn(List<StatutFacture> statuts); // Impayées
+    List<Facture> findByStatutIn(List<StatutFacture> statuts);
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(f.montantPaye) FROM Facture f")
+    Double sumTotalEncaisse();
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(f.montantTotal) FROM Facture f WHERE f.statut <> 'ANNULEE'")
+    Double sumTotalFacture();
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(f.montantTotal) FROM Facture f WHERE f.statut = 'PAYEE'")
+    Double sumTotalRecettes();
 }

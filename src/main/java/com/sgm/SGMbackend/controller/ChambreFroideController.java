@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/chambres")
 @RequiredArgsConstructor
+@Tag(name = "Gestion des Chambres Froides", description = "Endpoints pour la gestion des chambres et de leur état")
 public class ChambreFroideController {
 
     private final ChambreFroideService chambreFroideService;

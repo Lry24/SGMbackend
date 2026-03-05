@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AutopsieService {
-    Autopsie planifier(Long depouillId, String medecinId, LocalDateTime datePlanifiee);
+    Autopsie planifier(Long depouillId, String medecinId, LocalDateTime datePlanifiee, String salle);
 
     Autopsie demarrer(Long id);
 
@@ -25,4 +25,6 @@ public interface AutopsieService {
     List<Autopsie> findByMedecin(String medecinId);
 
     List<Autopsie> getPlanning(LocalDateTime date);
+
+    Autopsie modifier(Long id, String medecinId, LocalDateTime datePlanifiee, String salle);
 }

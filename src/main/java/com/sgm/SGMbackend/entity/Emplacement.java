@@ -1,5 +1,6 @@
 package com.sgm.SGMbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -30,6 +31,7 @@ public class Emplacement {
     private LocalDateTime dateAffectation; // Ajouté pour conformité diagramme
 
     // --- RELATION MANQUANTE AJOUTÉE ICI ---
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "chambre_froide_id")
     private ChambreFroide chambreFroide;
@@ -37,6 +39,7 @@ public class Emplacement {
     // ChambreFroide
     // ---------------------------------------
 
+    @JsonIgnore
     @OneToOne(mappedBy = "emplacement")
     private Depouille depouille; // Relation vers l'entité de DEV B
 

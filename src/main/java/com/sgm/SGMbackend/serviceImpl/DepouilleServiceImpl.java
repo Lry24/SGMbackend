@@ -8,7 +8,9 @@ import com.sgm.SGMbackend.entity.Depouille;
 import com.sgm.SGMbackend.entity.enums.StatutDepouille;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
+import com.sgm.SGMbackend.entity.MouvementDepouille;
 import com.sgm.SGMbackend.repository.DepouilleRepository;
+import com.sgm.SGMbackend.repository.MouvementDepouilleRepository;
 import com.sgm.SGMbackend.service.DepouilleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,15 +27,31 @@ import java.time.Year;
 public class DepouilleServiceImpl implements DepouilleService {
 
     private final DepouilleRepository depouilleRepository;
+    private final MouvementDepouilleRepository mouvementRepo;
 
     @Override
     @Transactional
     public Depouille enregistrer(Depouille depouille) {
         // RÈGLE 1 — Génération ID unique : Format SGM-AAAA-NNNNN
+        // On évite count() + 1 car les suppressions créent des collisions
         depouille.setIdentifiantUnique(genererIdentifiantUnique());
-        depouille.setDateArrivee(LocalDateTime.now());
+
+        if (depouille.getDateArrivee() == null) {
+            depouille.setDateArrivee(LocalDateTime.now());
+        }
+
         depouille.setStatut(StatutDepouille.RECUE);
-        return depouilleRepository.save(depouille);
+        Depouille saved = depouilleRepository.save(depouille);
+
+        // Enregistrer le mouvement initial
+        mouvementRepo.save(MouvementDepouille.builder()
+                .depouille(saved)
+                .description("Admission de la dépouille")
+                .dateMouvement(LocalDateTime.now())
+                .statut(StatutDepouille.RECUE)
+                .build());
+
+        return saved;
     }
 
     @Override
@@ -43,7 +61,17 @@ public class DepouilleServiceImpl implements DepouilleService {
         // RÈGLE 2 — Workflow statut (transitions autorisées)
         validerTransition(d.getStatut(), nouveauStatut);
         d.setStatut(nouveauStatut);
-        return depouilleRepository.save(d);
+        Depouille saved = depouilleRepository.save(d);
+
+        // Enregistrer le changement de statut
+        mouvementRepo.save(MouvementDepouille.builder()
+                .depouille(saved)
+                .description("Changement de statut : " + nouveauStatut)
+                .dateMouvement(LocalDateTime.now())
+                .statut(nouveauStatut)
+                .build());
+
+        return saved;
     }
 
     @Override
@@ -93,8 +121,19 @@ public class DepouilleServiceImpl implements DepouilleService {
 
     private String genererIdentifiantUnique() {
         int annee = Year.now().getValue();
-        long count = depouilleRepository.count() + 1;
-        return String.format("SGM-%d-%05d", annee, count);
+        String prefix = String.format("SGM-%d-", annee);
+
+        // On cherche le dernier identifiant de l'année en cours de façon robuste
+        long max = depouilleRepository.findAll().stream()
+                .map(Depouille::getIdentifiantUnique)
+                .filter(id -> id != null && id.startsWith(prefix))
+                .map(id -> id.substring(prefix.length()))
+                .filter(s -> s.matches("\\d+")) // Sécurité : seulement si c'est numérique
+                .mapToLong(Long::parseLong)
+                .max()
+                .orElse(0);
+
+        return String.format("%s%05d", prefix, max + 1);
     }
 
     private void validerTransition(StatutDepouille actuel, StatutDepouille nouveau) {

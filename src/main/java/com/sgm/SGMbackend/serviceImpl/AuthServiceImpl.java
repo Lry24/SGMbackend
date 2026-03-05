@@ -2,11 +2,13 @@ package com.sgm.SGMbackend.serviceImpl;
 
 import com.sgm.SGMbackend.config.SupabaseConfig;
 import com.sgm.SGMbackend.dto.dtoResponse.UtilisateurResponseDTO;
+import com.sgm.SGMbackend.entity.enums.GraviteAudit;
 import com.sgm.SGMbackend.entity.Utilisateur;
 import com.sgm.SGMbackend.exception.BusinessRuleException;
 import com.sgm.SGMbackend.exception.ResourceNotFoundException;
 import com.sgm.SGMbackend.mapper.UtilisateurMapper;
 import com.sgm.SGMbackend.repository.UtilisateurRepository;
+import com.sgm.SGMbackend.service.AuditLogService;
 import com.sgm.SGMbackend.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * Implémentation du service d'authentification.
+ * Ce service s'appuie sur Supabase Auth pour la gestion des sessions et des
+ * identifiants.
+ * Il assure également la synchronisation des données de connexion avec la base
+ * de données locale (PostgreSQL).
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,9 +41,19 @@ public class AuthServiceImpl implements AuthService {
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurMapper utilisateurMapper;
     private final RestTemplate restTemplate;
+    private final com.sgm.SGMbackend.service.UtilisateurService utilisateurService;
+    private final AuditLogService auditLogService;
 
-    // ─── Login ────────────────────────────────────────────────────────────────
-
+    /**
+     * Authentifie un utilisateur via l'API REST de Supabase Auth.
+     * En cas de succès, met à jour la date de dernière connexion en base locale.
+     * 
+     * @param email    Email de l'utilisateur
+     * @param password Mot de passe
+     * @return Map contenant le access_token, refresh_token et les métadonnées
+     *         utilisateur
+     * @throws BusinessRuleException si les identifiants sont invalides
+     */
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> login(String email, String password) {
@@ -58,16 +77,31 @@ public class AuthServiceImpl implements AuthService {
                 if (responseBody != null) {
                     responseBody.put("must_change_password", u.getDoitChangerMotDePasse());
                 }
+
+                auditLogService.log(
+                        u.getNom() + " " + u.getPrenom(),
+                        "CONNEXION_RÉUSSIE",
+                        "SÉCURITÉ",
+                        "Authentification réussie pour: " + email,
+                        GraviteAudit.INFO);
             });
 
             return responseBody;
         } catch (HttpClientErrorException e) {
+            auditLogService.log(
+                    "INCONNU",
+                    "ÉCHEC_CONNEXION",
+                    "SÉCURITÉ",
+                    "Tentative de connexion échouée pour: " + email,
+                    GraviteAudit.WARNING);
             throw new BusinessRuleException("Identifiants invalides.");
         }
     }
 
-    // ─── Logout ───────────────────────────────────────────────────────────────
-
+    /**
+     * Déconnecte l'utilisateur en invalidant son token auprès de Supabase
+     * et en nettoyant le contexte de sécurité local.
+     */
     @Override
     public void logout() {
         String token = getCurrentToken();
@@ -124,6 +158,30 @@ public class AuthServiceImpl implements AuthService {
         return utilisateurMapper.toResponseDTO(u);
     }
 
+    @Override
+    public UtilisateurResponseDTO updateProfile(String nom, String prenom) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userId;
+        if (principal instanceof Utilisateur) {
+            userId = ((Utilisateur) principal).getId();
+        } else {
+            userId = principal.toString();
+        }
+
+        Utilisateur u = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable en base : " + userId));
+
+        if (nom != null && !nom.trim().isEmpty()) {
+            u.setNom(nom);
+        }
+        if (prenom != null && !prenom.trim().isEmpty()) {
+            u.setPrenom(prenom);
+        }
+
+        utilisateurRepository.save(u);
+        return utilisateurMapper.toResponseDTO(u);
+    }
+
     // ─── Change Password ──────────────────────────────────────────────────────
 
     @Override
@@ -152,12 +210,30 @@ public class AuthServiceImpl implements AuthService {
                 Utilisateur u = (Utilisateur) principal;
                 u.setDoitChangerMotDePasse(false);
                 utilisateurRepository.save(u);
+
+                auditLogService.log(
+                        u.getNom() + " " + u.getPrenom(),
+                        "CHANGEMENT_MOT_DE_PASSE",
+                        "SÉCURITÉ",
+                        "Mot de passe mis à jour avec succès",
+                        GraviteAudit.INFO);
             }
         } catch (HttpClientErrorException e) {
             log.error("Erreur Supabase lors du changement de mot de passe : {} - Body: {}",
                     e.getStatusCode(), e.getResponseBodyAsString());
             throw new BusinessRuleException("Impossible de modifier le mot de passe : " + e.getMessage());
         }
+    }
+
+    @Override
+    public void forgotPassword(String email) {
+        utilisateurRepository.findByEmail(email).ifPresentOrElse(
+                u -> utilisateurService.resetPassword(u.getId()),
+                () -> {
+                    // Pour éviter le dénombrement d'utilisateurs, on ne lève pas d'erreur
+                    // mais on loggue
+                    log.warn("Demande de reset password pour email inexistant : {}", email);
+                });
     }
 
     // ─── Helper ───────────────────────────────────────────────────────────────

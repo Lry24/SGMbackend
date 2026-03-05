@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Gestion de l'Authentification", description = "Endpoints pour l'authentification et la gestion des sessions")
 public class AuthController {
 
     private final AuthService authService;
@@ -37,9 +39,20 @@ public class AuthController {
         return ResponseEntity.ok(authService.getCurrentUser());
     }
 
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(authService.updateProfile(body.get("nom"), body.get("prenom")));
+    }
+
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body) {
         authService.changePassword(body.get("oldPassword"), body.get("newPassword"));
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+        authService.forgotPassword(body.get("email"));
         return ResponseEntity.ok().build();
     }
 }

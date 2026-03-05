@@ -24,6 +24,7 @@ public class DepouilleResponseDTO {
     private String provenance;
     private String observations;
     private StatutDepouille statut;
+    private String statutPaiement; // ex: EN_ATTENTE, PAYEE, PARTIELLEMENT_PAYEE
 
     // Infos emplacement (sans charger toute la chambre)
     private Long emplacementId;

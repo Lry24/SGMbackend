@@ -12,14 +12,19 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Configuration principale Spring Security.
  * - Désactive CSRF (API REST stateless)
  * - Pas de session HTTP (JWT)
+ * - CORS configuré pour autoriser localhost:4200 (Angular dev server)
  * - Autorise /api/auth/login, /swagger-ui, /api-docs et /api/health
  * publiquement
  * - Toute autre requête requiert un JWT valide
@@ -38,10 +43,10 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .csrf(csrf -> csrf.disable())
                                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .exceptionHandling(ex -> ex
-                                                // 401 quand pas de token (au lieu du 403 par défaut de Spring Security)
                                                 .authenticationEntryPoint((request, response, authException) -> {
                                                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                                                         response.setContentType("application/json;charset=UTF-8");
@@ -53,7 +58,6 @@ public class SecurityConfig {
                                                         response.getWriter()
                                                                         .write(objectMapper.writeValueAsString(body));
                                                 })
-                                                // 403 quand token valide mais rôle insuffisant
                                                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                                                         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                                                         response.setContentType("application/json;charset=UTF-8");
@@ -66,7 +70,9 @@ public class SecurityConfig {
                                                                         .write(objectMapper.writeValueAsString(body));
                                                 }))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/auth/login").permitAll()
+                                                .requestMatchers("OPTIONS", "/**").permitAll()
+                                                .requestMatchers("/api/auth/login", "/api/auth/forgot-password")
+                                                .permitAll()
                                                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**")
                                                 .permitAll()
                                                 .requestMatchers("/api/health").permitAll()
@@ -76,4 +82,20 @@ public class SecurityConfig {
                 return http.build();
         }
 
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(List.of(
+                                "http://localhost:4200",
+                                "http://localhost:3000",
+                                "http://localhost:5173"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(List.of("*"));
+                config.setAllowCredentials(true);
+                config.setMaxAge(3600L);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/api/**", config);
+                return source;
+        }
 }

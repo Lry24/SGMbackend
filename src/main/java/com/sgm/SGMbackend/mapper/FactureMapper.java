@@ -3,6 +3,7 @@ package com.sgm.SGMbackend.mapper;
 import com.sgm.SGMbackend.dto.dtoRequest.FactureRequestDTO;
 import com.sgm.SGMbackend.dto.dtoResponse.FactureResponseDTO;
 import com.sgm.SGMbackend.entity.Facture;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -11,6 +12,8 @@ import org.mapstruct.MappingTarget;
 public interface FactureMapper {
 
     @Mapping(target = "depouilleId", source = "depouille.id")
+    @Mapping(target = "nomDefunt", source = "depouille.nomDefunt")
+    @Mapping(target = "prenomDefunt", source = "depouille.prenomDefunt")
     @Mapping(target = "autopsieId", source = "autopsie.id")
     FactureResponseDTO toResponseDTO(Facture entity);
 

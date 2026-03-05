@@ -16,6 +16,8 @@ public class FactureResponseDTO {
     private LocalDateTime dateEmission;
     private FamilleResponseDTO famille;
     private Long depouilleId;
+    private String nomDefunt;
+    private String prenomDefunt;
     private Long autopsieId;
     private Double montantTotal;
     private Double montantPaye;
